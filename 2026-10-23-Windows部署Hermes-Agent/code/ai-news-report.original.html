@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国内AI热点周报 · 2026.10.16 - 10.23</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #181c26;
+    --border: #2a3040;
+    --text: #e6e9f0;
+    --muted: #8b93a5;
+    --accent: #5b8cff;
+    --accent2: #37d4a0;
+    --warn: #ffb454;
+    --danger: #ff6b6b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    line-height: 1.7;
+    padding: 40px 16px 80px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 36px; }
+  header h1 {
+    font-size: 30px;
+    background: linear-gradient(90deg, #5b8cff, #37d4a0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 8px;
+  }
+  header .sub { color: var(--muted); font-size: 14px; }
+  .stats {
+    display: flex; justify-content: center; gap: 24px; margin-top: 20px; flex-wrap: wrap;
+  }
+  .stat {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 20px; text-align: center;
+  }
+  .stat b { display: block; font-size: 22px; color: var(--accent); }
+  .stat span { font-size: 12px; color: var(--muted); }
+  h2.section {
+    font-size: 20px; margin: 40px 0 16px; padding-left: 12px;
+    border-left: 4px solid var(--accent);
+  }
+  h2.section .tag { font-size: 12px; color: var(--muted); font-weight: normal; margin-left: 10px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 24px; margin-bottom: 14px;
+    transition: border-color .2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card .top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+  .card h3 { font-size: 17px; font-weight: 600; }
+  .date {
+    font-size: 12px; color: var(--bg); background: var(--accent2);
+    padding: 1px 8px; border-radius: 20px; font-weight: 600; white-space: nowrap;
+  }
+  .heat { font-size: 12px; color: var(--warn); white-space: nowrap; }
+  .card p { color: #c3c9d6; font-size: 14.5px; }
+  .card .src { margin-top: 8px; font-size: 12px; color: var(--muted); }
+  .card .src a { color: var(--accent); text-decoration: none; }
+  .card .src a:hover { text-decoration: underline; }
+  .hot { border-left: 3px solid var(--danger); }
+  .note {
+    background: rgba(91,140,255,.08); border: 1px dashed var(--border);
+    border-radius: 12px; padding: 14px 18px; font-size: 13px; color: var(--muted); margin-top: 40px;
+  }
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>国内 AI 热点周报</h1>
+    <div class="sub">2026年10月16日 — 10月23日 · 按热度整理的7天国内人工智能大事记</div>
+    <div class="stats">
+      <div class="stat"><b>4</b><span>条万亿级/重磅融资与资本事件</span></div>
+      <div class="stat"><b>8+</b><span>个新模型与开源项目</span></div>
+      <div class="stat"><b>3</b><span>条重要政策监管动态</span></div>
+    </div>
+  </header>
+
+  <h2 class="section">🔥 融资与资本市场 <span class="tag">本周最大看点</span></h2>
+
+  <div class="card hot">
+    <div class="top"><span class="date">10.22</span><h3>DeepSeek 完成约1000亿元融资，中国AI史上最大单笔</h3><span class="heat">热度 ★★★★★</span></div>
+    <p>据彭博社报道，DeepSeek 完成最新一轮约 1000 亿元人民币融资，为首轮目标（500亿元）的两倍，腾讯、宁德时代为最大出资方。公司估值约 5000 亿元，超过智谱与 MiniMax 港股市值总和的两倍；两轮累计募资超 1500 亿元。资金将用于 AI 数据中心建设与开源模型研发，并已开始筹备 IPO。</p>
+    <div class="src">来源：<a href="https://www.163.com/dy/article/L9RISM8N0511D6RL.html">网易/云头条</a> · <a href="https://news.qq.com/">彭博社、智东西</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">10.22</span><h3>MiniMax 港股上市首度破发，大模型板块估值重估</h3><span class="heat">热度 ★★★★☆</span></div>
+    <p>MiniMax（0100.HK）收盘 160.7 港元，首次跌破 165 港元发行价，市值 566 亿港元，较 3 月峰值蒸发逾 3500 亿港元。创始人闫俊杰发内部信：公司实现 AGI 前不再领取薪酬，并拿出个人 4% 股份激励团队、1% 设开源专项基金。同日智谱市值约 2250 亿港元，仍为其 4 倍——市场焦点转向模型迭代速度与商业化兑现。</p>
+    <div class="src">来源：<a href="https://zgeo.net/news/minimax-ipo-break-zhihu-valuation-revaluation">智脑时代</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">本周</span><h3>智谱获约50亿美元融资，加速下一代 GLM 基座研发</h3><span class="heat">热度 ★★★★☆</span></div>
+    <p>智谱宣布完成约 50 亿美元融资，用于下一代 GLM 基础模型及"完全自训练（Full Self-Training）"体系研发，探索递归式自我改进（RSI）。截至 8 月底智谱 ARR 达 16 亿美元，约为 MiniMax（8亿美元）的两倍。</p>
+    <div class="src">来源：<a href="https://ainewshub.info">AI News Hub 等多家媒体汇总</a></div>
+  </div>
+
+  <h2 class="section">🚀 模型发布与技术开源</h2>
+
+  <div class="card">
+    <div class="top"><span class="date">10.20</span><h3>DeepSeek 全面开源生产级推理框架 DeepInfer</h3><span class="heat">热度 ★★★★★</span></div>
+    <p>DeepSeek 以 Apache 2.0 协议开源支撑线上服务的推理框架 DeepInfer，并同步开源 Token 编解码组件 deepseek-recipe（MIT）。官方罕见披露运营数据：单集群每天服务 155 万亿 token、每 GPU 小时收入约 38 美元。框架集成投机解码（DSpark）、有界重放等优化，同时兼容英伟达 Blackwell（SM100）与华为昇腾 950，被视为对国产算力生态的重要支持。</p>
+    <div class="src">来源：<a href="https://www.yicai.com/brief/103401233.html">第一财经</a> · <a href="https://ai.concitech.org/daily/2026-10-20/">Concitech AI 日报</a> · <a href="https://www.tmtpost.com/8177010.html">钛媒体</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">10.19</span><h3>MiniMax 发布 M3.1 Flash：揭晓"太空兔"真身，Agent 成本降七成</h3><span class="heat">热度 ★★★★☆</span></div>
+    <p>此前在 OpenRouter 上匿名霸榜的神秘模型"Space Bunny（太空兔）"揭晓为 MiniMax M3.1 Flash。官方称推理速度提升近 3 倍、Agent 任务综合使用成本降低 70%，输入价格低至每百万 token 1 元。权重已于 10 月 23 日开源，更高智能上限的 Pro 版本稍后推出。</p>
+    <div class="src">来源：<a href="https://news.qq.com/rain/a/20261020A0DHK600">腾讯新闻/AI新榜</a> · <a href="https://platform.qianwenai.com/docs/changelog/models">模型发布记录</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">10.21</span><h3>智谱 GLM-5.5 参数曝光：或达 3.5 万亿，目标 Fable 级旗舰</h3><span class="heat">热度 ★★★★☆</span></div>
+    <p>网传专家纪要显示，智谱下一代旗舰基座参数规模在 2.5 万亿–3.5 万亿之间（此前"1.6T"传闻被否认），采用更激进架构，目标发布首日即提供大规模服务，能力对标海外顶级闭源模型 Fable 级别，预计 10 月底至 11 月初发布。同时 GLM-5.3-Highspeed 已开启灰度，实测输出速度约 490 tokens/s；GLM-5.2（1M 上下文）宣布开源并遵循 MIT 协议。</p>
+    <div class="src">来源：<a href="https://www.163.com/dy/article/L9PMI9M00556KHRQ.html">网易/智猩猩</a> · <a href="https://c.m.163.com/news/a/L9QAP3H10556PZVL.html">巴伦日讯</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">10.17</span><h3>DeepSeek-V4.1-Flash-1017 更新：自称"新的最优性价比模型"</h3><span class="heat">热度 ★★★☆☆</span></div>
+    <p>DeepSeek 发布 V4.1 Flash 迭代版本，基于自反馈强化学习训练，在 Terminal-Bench 4.0、DeepSWE v1.1、ProgramBench 等基准显著提升，缩短任务运行时间与输出长度，支持 1M 上下文与"许愿式"编程（游戏开发、3D 建模等从零构建任务）。</p>
+    <div class="src">来源：<a href="https://companies.caixin.com/m/2026-10-19/102494716.html">财新网</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">10.20</span><h3>蚂蚁百灵开源 Ming-3.0 语音系列 5 款模型；联合 vLLM 开源推理内核 Humming</h3><span class="heat">热度 ★★★☆☆</span></div>
+    <p>蚂蚁百灵开源 Ming-3.0 语音系列共 5 款模型，覆盖语音合成（支持"导演模式"情绪调度）、长录音理解与方言识别，采用 MIT 授权，含 126B Flash 与 9.3B Tiny 双版本。同期蚂蚁集团与 vLLM 社区开源通用高性能量化推理内核库 Humming。</p>
+    <div class="src">来源：<a href="https://news.qq.com/rain/a/20261020A0DHK600">AI新榜</a> · <a href="https://www.ailxg.com/aihot/">AI HOT 日报</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">10.20</span><h3>上海团队开源记忆原生大模型 MemT-1.0：显存降低 120 倍</h3><span class="heat">热度 ★★★☆☆</span></div>
+    <p>MemOS/MemTensor 团队（上海）发布并开源 MemT 1.0，首个"记忆原生"MoE 大模型，将海马体式记忆模块嵌入 Transformer 底层：256K 上下文下显存从 5.06GB 降至恒定 40MB，完全去除 KV 缓存，首字延迟稳定在 100ms 内。编程测试中经验内化使 SWE-bench Verified 成功率从 66.07% 升至 69.73%。</p>
+    <div class="src">来源：<a href="https://www.yicai.com/brief/103401233.html">第一财经</a> · <a href="https://readcopilot.ionichina.com/digest/375">AI HOT 晚报</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">10.18–10.19</span><h3>阿里 Qwen-Image-2.1、小米 MiMo UltraSpeed、阶跃 Step 5 Preview 密集上线</h3><span class="heat">热度 ★★★☆☆</span></div>
+    <p>阿里开源 Qwen-Image-2.1 Turbo/Pro 图像生成与编辑模型（70 亿参数、原生透明通道、支持 10 张参考图）；小米上架 MiMo-V2.6-Pro-UltraSpeed（1 万亿参数旗舰的高速版，速度提升约 10 倍）；阶跃星辰 Step 5 Preview（600B MoE）在编程与金融任务上达到前沿水平。</p>
+    <div class="src">来源：<a href="https://platform.qianwenai.com/docs/changelog/models">千问平台模型发布记录</a></div>
+  </div>
+
+  <h2 class="section">⚖️ 政策与监管</h2>
+
+  <div class="card hot">
+    <div class="top"><span class="date">10.20</span><h3>美国政府禁用 DeepSeek，中国外交部回应</h3><span class="heat">热度 ★★★★★</span></div>
+    <p>美国国土安全部在《联邦公报》发布正式通知，禁止联邦政府计算机系统使用 DeepSeek 全系列产品，要求民事部门删除相关产品及使用其成果创建的第三方衍生品，且无过渡期——限制手段首次从芯片/算力延伸到具体大模型软件。外交部发言人毛宁回应：中方反对泛化国家安全概念、将科技经贸问题政治化，将坚决维护中国企业合法权益。</p>
+    <div class="src">来源：<a href="https://news.qq.com/rain/a/20261020A0DHK600">AI新榜/新华社</a> · <a href="https://c.m.163.com/news/a/L9QAP3H10556PZVL.html">巴伦日讯</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">本周</span><h3>工信部发布《"人工智能+软件"专项行动实施方案》；全国智算规模同比+177%</h3><span class="heat">热度 ★★★★☆</span></div>
+    <p>方案提出到 2030 年关键软件全面实现智能化升级，培育智能体软件新业态。2026 中国算力大会披露：中国算力平台已实现全国一体化算力统筹监测，31 省区市全部接入，截至 6 月底智算规模达 2185 EFLOPS，同比增长 177%。</p>
+    <div class="src">来源：<a href="https://ainewshub.info">AI News Hub</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">10.21–10.22</span><h3>南威软件蹭 AI 热点被上交所监管警示，四天三涨停后跌停</h3><span class="heat">热度 ★★★☆☆</span></div>
+    <p>南威软件因 AI 短剧、智算中心等业务信披不准确、不完整被上交所监管警示，复牌首日跌停。10 月 20 日异动公告自曝：AI 短剧未上线、无收入，智算中心收入为零。此前公司股价借热点四天三涨停。监管层近期持续严查"借科技之名炒概念"。</p>
+    <div class="src">来源：<a href="https://finance.sina.com.cn/roll/2026-10-22/doc-iniwchpc5155548.shtml">新浪财经</a> · <a href="https://finance.jrj.com.cn/2026/10/22215258826652.shtml">金融界</a></div>
+  </div>
+
+  <h2 class="section">🏭 产业落地与生态</h2>
+
+  <div class="card">
+    <div class="top"><span class="date">10.18–10.19</span><h3>新华社：中国民企 AI 大模型全球"圈粉"，调用量连续 24 周全球第一</h3><span class="heat">热度 ★★★★☆</span></div>
+    <p>OpenRouter 数据测算，上周（10.5–10.11）全球大模型总调用量 172 万亿 token，其中中国模型达 86.74 万亿，是美国的 4.5 倍，全球周调用量前五均为中国民企大模型。斯坦福《2026 AI 指数报告》显示中美顶尖模型差距仅 2.7%。DoorDash、爱彼迎、西门子等海外企业纷纷拥抱中国模型。</p>
+    <div class="src">来源：<a href="https://www.stdaily.com/web/gdxw/2026-10/19/content_598484.html">科技日报</a> · <a href="https://news.sina.com.cn/zx/gj/2026-10-18/doc-inivshcm7179860.shtml">中新社</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">10.20</span><h3>QuestMobile 三季报：AI 原生 App 月活 5.46 亿，同比增长 82%</h3><span class="heat">热度 ★★★☆☆</span></div>
+    <p>截至 9 月，AI 原生 App 月活 5.46 亿（+82.1%），AI 综合助手用户 11.57 亿。豆包、千问、DeepSeek 月活分别为 4.19 亿、1.58 亿、1.23 亿；AI 办公赛道月活 1.42 亿，腾讯 WorkBuddy 以 3235 万居首。</p>
+    <div class="src">来源：<a href="https://news.qq.com/rain/a/20261020A0DHK600">AI新榜</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">10.22</span><h3>重庆通用人工智能大会：物理 AI 成焦点，千里科技、奇瑞密集发布</h3><span class="heat">热度 ★★★☆☆</span></div>
+    <p>千里科技董事长印奇发布 2.0 阶段三大成果，称"智能汽车是物理 AI 落地的核心载体"；奇瑞发布面向物理 AI 的 CheryMind 大模型。同期小鹏 IRON 人形机器人依托第二代 VLA 大模型升级：每 0.2 秒重新推理一次，可预测人类未来 6 秒内的动作。</p>
+    <div class="src">来源：<a href="https://nbd.com.cn/articles/2026-10-22/4613450.html">每日经济新闻</a> · <a href="https://k.sina.com.cn/article_7857201856_1d45362c001908s1aa.html">新浪AI热点小时报</a></div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="date">本周</span><h3>大厂 Agent 平台密集发布：美团 CatPaw、腾讯 CodeBuddy NPC、360 纳米Work、阿里"万有无界"</h3><span class="heat">热度 ★★★☆☆</span></div>
+    <p>美团推出全场景 Agent 平台 CatPaw（内部已覆盖 9 万员工、3 万个 Agent）；腾讯云推出"住在云端的 AI 员工" CodeBuddy NPC（在 Issue 中 @NPC 即可自主交付代码）；360 发布企业智能体平台纳米Work；阿里内测多角色 Agent 协作工作台"万有无界"。国内 AI 竞争主线正从"发布模型"转向"Agent 协同交付"。</p>
+    <div class="src">来源：<a href="https://ai-bot.cn/daily-ai-news">AI工具集每日资讯</a></div>
+  </div>
+
+  <div class="note">
+    ℹ️ 说明：本页由公开网络报道整理，时间范围为 2026年10月16日–23日（最近7天），热度为综合多家科技媒体报道频率的相对评估。个别传闻类消息（如智谱 GLM-5.5 参数）未经官方确认，已标注来源。点击标题下方链接可查看原文。
+  </div>
+
+  <footer>生成于 2026年10月23日 · 数据来源：新华社 / 第一财经 / 财新 / 彭博社 / 智东西 / 机器之心 / AI新榜 等公开报道</footer>
+</div>
+</body>
+</html>

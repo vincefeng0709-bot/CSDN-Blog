@@ -1,0 +1,15 @@
+# Keep original screenshots and internal audit records local.
+/博客插图/
+/verification.md
+/images/image-manifest.json
+
+# Generated preview and duplicate upload preparation assets.
+/article.preview.html
+/csdn-upload/README.md
+/csdn-upload/article.template.md
+/csdn-upload/csdn-images.zip
+/csdn-upload/image-map.json
+/csdn-upload/image-url-verification.json
+/csdn-upload/uploaded-image-urls.json
+/csdn-upload/images/*
+!/csdn-upload/images/封面图-Windows本地部署Hermes AI周报.png
