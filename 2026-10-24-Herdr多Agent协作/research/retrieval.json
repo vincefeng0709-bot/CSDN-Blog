@@ -1,0 +1,82 @@
+[
+  {
+    "name": "home",
+    "url": "https://herdr.dev/",
+    "resolved_url": "https://herdr.dev/",
+    "sha256": "cfde7124dab865155233aa9f9b6445002996327ea4eb148077730dec315c3100",
+    "images": [],
+    "characters": 6389
+  },
+  {
+    "name": "install",
+    "url": "https://herdr.dev/docs/install/",
+    "resolved_url": "https://herdr.dev/docs/install/",
+    "sha256": "7f96fcb70528a0b457ba803a4d1c8e0d1dee1e66fe99c7d7dd097196bb934a50",
+    "images": [],
+    "characters": 7394
+  },
+  {
+    "name": "automation",
+    "url": "https://herdr.dev/docs/agent-automation/",
+    "resolved_url": "https://herdr.dev/docs/agent-automation/",
+    "sha256": "ac78593d7940bd811e5853445ab36ab88cd9412ada9baa5296a057764cf7a441",
+    "images": [],
+    "characters": 12903
+  },
+  {
+    "name": "cli",
+    "url": "https://herdr.dev/docs/cli-reference/",
+    "resolved_url": "https://herdr.dev/docs/cli-reference/",
+    "sha256": "d4e971bd0a188b1080adc0ad4bc4a1ce8601f59ecef1b94d6d66e04854b32241",
+    "images": [],
+    "characters": 38111
+  },
+  {
+    "name": "skill",
+    "url": "https://herdr.dev/docs/agent-skill/",
+    "resolved_url": "https://herdr.dev/docs/agent-skill/",
+    "sha256": "79ff20aec81b15f674f60f489537d9108d5f2afad1e7241bb20a77f8efce2cc8",
+    "images": [],
+    "characters": 3722
+  },
+  {
+    "name": "windows",
+    "url": "https://herdr.dev/docs/windows-beta/",
+    "resolved_url": "https://herdr.dev/docs/windows-beta/",
+    "sha256": "7a40432634d773944e481051db4bd6b0f1a4a527006788668cff3e0a556733f7",
+    "images": [],
+    "characters": 13245
+  },
+  {
+    "name": "integrations",
+    "url": "https://herdr.dev/docs/integrations/",
+    "resolved_url": "https://herdr.dev/docs/integrations/",
+    "sha256": "7c8da72e8b8a39587e8aae2e438103f4bbb7153f609351919b8c9217701057f0",
+    "images": [],
+    "characters": 22749
+  },
+  {
+    "name": "readme",
+    "url": "https://raw.githubusercontent.com/herdrdev/herdr/master/README.md",
+    "resolved_url": "https://raw.githubusercontent.com/herdrdev/herdr/master/README.md",
+    "sha256": "9b3943664e3c4cf928c1e317f1de632d9a051e59c4b8b6b0e93f1decc43dbb3d",
+    "images": [],
+    "characters": 4943
+  },
+  {
+    "name": "license",
+    "url": "https://raw.githubusercontent.com/herdrdev/herdr/master/LICENSE",
+    "resolved_url": "https://raw.githubusercontent.com/herdrdev/herdr/master/LICENSE",
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "images": [],
+    "characters": 11357
+  },
+  {
+    "name": "skill-source",
+    "url": "https://raw.githubusercontent.com/herdrdev/herdr/master/skills/herdr/SKILL.md",
+    "resolved_url": "https://raw.githubusercontent.com/herdrdev/herdr/master/skills/herdr/SKILL.md",
+    "sha256": "fbd9d502767f7dff29c211505a0bd9ba34e980ed4cc456247e2adc1642883984",
+    "images": [],
+    "characters": 15171
+  }
+]

@@ -1,0 +1,424 @@
+# 让 Claude Code 当大脑，Codex、OpenCode 干活：Herdr 多 Agent 协作指南
+
+写代码时同时用上 Claude Code、Codex 和 OpenCode，并不意味着它们已经开始协作。实际操作往往还是人来拆任务，把需求粘贴到不同窗口，再把执行结果搬回主窗口审核。
+
+如果希望 Claude Code 负责理解需求和审核，Codex、OpenCode 负责具体执行，就需要让主控 Agent 能找到其他 Agent、发送任务、等待执行，并读取结果。
+
+Herdr 提供的就是这一层终端运行与控制能力。它把多个编程 Agent 放在可管理的终端里，同时开放 CLI 和 Socket API，让 Agent 也能操作这些终端。[3][8]
+
+本文重点介绍 Herdr，以及如何基于它设计“主控—执行—审核—返工”的协作流程。
+
+> 本文依据 2026 年 10 月 24 日查阅的官方文档整理，是工具介绍与配置指南，不是本机实测报告。文中的命令和提示词未执行多 Agent 联调；插图来自 Herdr 官方公开素材，不能作为本文方案已经运行成功的证据。
+
+![Herdr 官方宣传图](https://i-blog.csdnimg.cn/direct/91c6b59d1c1e4300a4911ce72f769e67.png#pic_center)
+
+*图 1：Herdr 官网公开宣传素材，强调 Agent 运行环境与持续运行能力；不是安装截图或本文运行结果。[12]*
+
+## 一、先分清模型、编程 Agent 和 Herdr
+
+这几个名字容易混在一起，先明确各自的位置。
+
+| 层次 | 本文中的对象 | 职责 |
+| --- | --- | --- |
+| 模型 | 各 Agent 实际连接的语言模型 | 理解、推理、生成内容 |
+| 编程 Agent / CLI | Claude Code、Codex、OpenCode | 调用模型，并通过自身工具读写文件、运行命令 |
+| 终端运行与控制层 | Herdr | 管理终端、识别 Agent、传递输入、读取输出、观察状态 |
+| 协作规则 | 主控提示词、任务边界、验收标准 | 规定谁负责什么、什么时候返工、何时交付 |
+
+Herdr 官方明确说明，它不替换这些编程 Agent，而是管理它们所在的终端。[8]
+
+因此，Herdr 不是“填入几个 API Key，然后自动分配任务”的统一模型客户端。本文这套方案仍需让 Claude Code、Codex、OpenCode 分别完成自身的安装、模型配置和登录；Herdr 再启动或识别它们。[3]
+
+也要避免把“本地运行”理解成“模型权重部署在本地”。本文讨论的是在本地运行 Herdr 和编程终端，模型推理在哪里执行，取决于各 Agent 的配置。
+
+## 二、Herdr 比同时打开几个终端多了什么
+
+### 2.1 工作区、标签页、面板
+
+Herdr 把终端组织成三层：Workspace（工作区）、Tab（标签页）、Pane（面板）。工作区和标签页负责组织布局，面板承载实际终端。[3]
+
+可以把一个项目放进一个工作区，在同一标签页中安排主控、执行者和测试终端：
+
+```text
+项目工作区
+└── 协作标签页
+    ├── Claude Code：拆解需求、调度、复审
+    ├── Codex：实现任务 A
+    ├── OpenCode：实现任务 B
+    └── Shell：运行测试或开发服务
+```
+
+上面是本文建议的布局，不是 Herdr 自动生成的固定团队模板。
+
+![Herdr 官方仓库界面截图](https://i-blog.csdnimg.cn/direct/f16d227819a94823aba7eb4601f90bf7.png#pic_center)
+
+*图 2：Herdr 官方仓库公开界面截图。左侧可见工作区与 Agent 列表，右侧为分屏终端；图中展示 Pi 与 Claude Code，不是本文的 Codex、OpenCode 联调截图。截图的界面版本也不代表当前版本外观。[11]*
+
+### 2.2 面板和 Agent 是两个不同对象
+
+一个 Pane 即使没有 Agent，也可以运行普通 Shell、测试程序或开发服务器。Agent 则是 Herdr 在某个 Pane 中识别出的编程助手进程。[3]
+
+这一区别直接影响命令怎么选：
+
+- 创建布局、执行普通命令、读取测试输出，使用 `pane` 命令。
+- 启动编程 Agent、发送需求、等待 Agent 状态，使用 `agent` 命令。
+
+例如，`herdr agent start` 不会替你创建面板。必须先准备一个处于 Shell 提示符、没有其他前台程序占用的 Pane，再启动 Agent。[3]
+
+### 2.3 主控能通过 CLI 调度执行者
+
+Herdr 提供了 `agent start`、`agent prompt`、`agent wait`、`agent read` 等接口。一个 Agent 可以通过这些接口启动其他 Agent、提交任务、等待状态变化并收集输出。[3][4]
+
+这正是本文方案成立的基础：Claude Code 不需要靠人手动搬运每一条消息，而是可以调用 Herdr CLI 完成调度。
+
+不过，任务应该怎样拆、谁负责审核、怎样认定通过，仍要由主控指令和项目规范约束。**Herdr 提供控制接口，不提供正确性保证。**
+
+## 三、本地搭建需要准备什么
+
+读者自行搭建时，需要先准备：
+
+1. 一个终端环境，以及已加入 `PATH` 的 Herdr。
+2. 已能独立启动并正常工作的 Claude Code、Codex、OpenCode。
+3. 各 Agent 各自有效的认证与模型配置。
+4. 一个允许 Agent 操作的项目，最好先用可丢弃的示例项目。
+
+本文不展开三个 Agent 各自的账号与安装教程，避免把 Herdr 的主线打散。至少先在各自终端中验证：能启动、能响应、能在预期目录工作。Herdr 的 `--kind` 用来选择 Agent 类型，传给 Agent 的原生参数需要写在 `--` 后面。[3]
+
+### 3.1 Windows 安装
+
+官方目前将原生 Windows 支持列为正式可用，新安装默认使用 stable 通道。它不再只是“只能在 WSL 里运行”的工具。[2][6]
+
+下面是官方 PowerShell 安装方式。它会下载并执行远程安装脚本，执行前应检查脚本与组织安全策略；本文没有执行该命令。[2]
+
+```powershell
+powershell -ExecutionPolicy Bypass -c "irm https://herdr.dev/install.ps1 | iex"
+```
+
+如果不希望直接执行远程脚本，可从官方 Releases 下载 Windows 压缩包。解压后应保留整个目录，因为包内除了 `herdr.exe`，还包含应用本地的 ConPTY 运行时，不能只复制一个 EXE。[2]
+
+安装完成后，重新打开终端，检查：
+
+```powershell
+herdr --version
+herdr --help
+```
+
+进入准备好的项目目录，再运行：
+
+```powershell
+herdr
+```
+
+`herdr` 本身用于打开或连接 TUI；查询命令帮助应使用 `--help`，不要把裸 `herdr` 当作无副作用的检测命令。[10]
+
+### 3.2 Linux、macOS 的安装方式
+
+官方提供 Shell 安装器；已经使用 Homebrew 的读者也可以选择 Homebrew。以下是两种替代路线，不需要全部执行。[2]
+
+```bash
+# 路线一：官方安装器；执行前检查远程脚本
+curl -fsSL https://herdr.dev/install.sh | sh
+
+# 路线二：Homebrew
+brew install herdr
+```
+
+本文后续手工示例使用 PowerShell 语法，不能把变量赋值直接照搬到 Bash。
+
+### 3.3 Windows 仍需注意的限制
+
+原生 Windows 使用 ConPTY，不是 Unix PTY。官方仍列出部分限制，例如中文输入法候选框定位、某些按键和图片粘贴行为依赖外层终端；直接终端附着 `herdr terminal attach` 和 live server handoff 不在原生 Windows 支持范围内。[6]
+
+因此，初次搭建建议先验证文本任务链路，不要同时引入远程连接、图片输入和自动更新等额外变量。
+
+## 四、让 Claude Code 学会使用 Herdr
+
+### 4.1 安装官方 Skill
+
+只启动 Claude Code，并不会自动给它完整的 Herdr 操作规则。官方提供了可复用 Skill，教 Agent 查看布局、拆分面板、启动助手、发送任务和读取输出。[5]
+
+官方安装命令如下，需要环境中可运行 `npx`。它会联网安装 Skill；`-g` 表示面向支持的 Agent 做全局安装，省略它则安装到当前项目。[5]
+
+```powershell
+npx skills add herdrdev/herdr --skill herdr -g
+```
+
+不希望使用这个安装方式时，可按官方文档手动安装 Skill。已经安装 Herdr 的读者还可以打印随该二进制附带的版本匹配副本，避免只参照持续变化的仓库主分支。[5]
+
+```powershell
+herdr --skill
+```
+
+然后，在 Herdr 管理的 Pane 中启动主控：
+
+```powershell
+claude
+```
+
+### 4.2 不要手动伪造 `HERDR_ENV`
+
+官方 Skill 要求 Agent 先检查 `HERDR_ENV=1`，确认自己正在 Herdr 管理的面板内。未满足条件时，应停止控制操作。[5][10]
+
+在 Herdr Pane 的 PowerShell 中，可查看：
+
+```powershell
+$env:HERDR_ENV
+$env:HERDR_PANE_ID
+```
+
+正确做法是从 Herdr 面板启动 Claude Code，让它继承运行上下文，而不是在普通终端手动设置一个变量，假装已经处于 Herdr 中。
+
+### 4.3 Skill 和 Integration 不是一回事
+
+Skill 负责告诉 Agent“怎样操作 Herdr”；Integration 则用于报告会话身份，部分 Agent 的集成还会主动报告生命周期状态，帮助 Herdr 恢复会话或观察状态。[5][7]
+
+可按需要安装本文涉及的集成：
+
+```powershell
+herdr integration install claude
+herdr integration install codex
+herdr integration install opencode
+herdr integration status
+```
+
+这些命令会修改相应 Agent 的配置或安装 Hook、插件，执行前应检查并备份已有配置。它们不是只读查询，也不会替代三个 Agent 各自的安装。[7]
+
+官方当前说明：Claude Code、Codex 的集成报告会话身份，状态仍来自 Herdr 的屏幕检测；OpenCode 集成还可报告生命周期状态。不能笼统地说“三者都依靠 Hook 精确上报全部状态”。[7]
+
+## 五、把主控—执行—审核写成明确规则
+
+下面是本文设计的协作流程，不是 Herdr 自带的固定模式：
+
+```text
+用户给出需求与操作边界
+        ↓
+Claude Code 阅读项目、拆分任务、确定验收标准
+        ↓
+通过 Herdr 启动并调度执行者
+        ├── Codex：任务 A
+        └── OpenCode：任务 B
+        ↓
+Claude Code 读取结果、审查实际文件与差异、运行验证
+        ↓
+发现问题 → 定向返工 → 复审
+        ↓
+汇总交付；外部发布等高风险动作保留人工确认
+```
+
+“Claude 当大脑”是一种分工选择，不是对它必然更擅长所有任务的性能结论。这个方案的价值，在于指定一个明确负责整合与验收的角色。
+
+### 5.1 适合第一次演示的任务
+
+可以从“给一个现有的纯静态网页增加主题切换和使用说明”开始：
+
+| 角色 | 负责内容 | 可修改范围 |
+| --- | --- | --- |
+| Claude Code | 检查现状、定义交互要求、整合和验收 | 先只读，确有需要再做整合修改 |
+| Codex | 实现主题按钮与样式切换 | `index.html`、`theme.js`、`theme.css` |
+| OpenCode | 根据约定编写使用说明和人工验收清单 | `README.md` |
+
+先由主控确定文件名、交互要求和验收标准，再并行派工。OpenCode 写说明时依据的是已约定的接口，最终仍要由主控核对文档与实际实现是否一致。
+
+这里不提供虚构的网页产物或“测试通过”截图。这个任务只用于解释如何分工，读者可以换成自己的项目。
+
+### 5.2 给主控的提示词
+
+下面的指令可以在安装 Skill、进入项目并启动 Claude Code 后使用。它是建议模板，尚未经过本文本机联调。
+
+```text
+在当前项目中使用 Herdr 组织协作，由你负责主控和最终审核。
+
+先检查项目文件、可用命令以及 HERDR_ENV。若不在 Herdr 管理的面板中，停止调度。
+
+我的目标：为现有静态网页增加主题切换功能，并补充使用说明。
+
+协作要求：
+1. 先阅读项目，给出文件分工和验收标准。依赖未明确前不要派工。
+2. 使用 Herdr 官方 Skill 和当前二进制帮助，不猜面板 ID。
+3. 创建执行者面板时保持当前项目目录，使用 --no-focus，不抢占我的焦点。
+4. 启动名为 implementer 的 Codex，负责网页功能实现。
+5. 启动名为 documenter 的 OpenCode，负责 README.md 的使用说明和人工验收清单。
+6. 两者不得修改同一个文件，不得调用彼此继续派生 Agent。
+7. 文件职责和输入明确后可并行派工，后续逐个检查工作状态。
+8. 遇到登录、权限申请、费用、安装依赖、删除或外部写入，暂停并询问我，不自动批准。
+9. Agent 返回 idle 或 done 后，读取其交付，再检查实际文件和差异；不能只相信完成说明。
+10. 运行项目已有的相关验证；没有自动化测试时如实说明，不能伪造通过结果。
+11. 发现问题只派给责任执行者返工；每个任务最多返工两轮，仍未解决则汇报阻塞。
+12. 未经确认不提交、不推送、不部署。最后列出变更、真实检查结果和未解决问题。
+```
+
+返工两轮是本文建议的控制策略，不是 Herdr 的内置限制。执行者也不必获得继续调度其他 Agent 的权限，否则很容易把一个小任务扩展成难以追踪的递归派工。
+
+## 六、用 CLI 看懂一次调度
+
+提示词决定协作规则，CLI 决定主控实际能做什么。下面通过几个手工示例拆解它的工作方式，便于检查主控有没有正确调用 Herdr。
+
+> 以下是 PowerShell 示例，须在 Herdr 管理的 Pane、正确的项目目录内执行。它们会创建面板并启动 Agent，可能引发各 Agent 自身的模型调用或确认流程；本文未执行这些操作。
+
+### 6.1 创建面板，再启动执行者
+
+```powershell
+if ($env:HERDR_ENV -ne '1') {
+    throw '请先进入 Herdr 管理的面板'
+}
+
+$split = herdr pane split --current --direction right --cwd "$PWD" --no-focus
+if ($LASTEXITCODE -ne 0) { throw '创建面板失败，请检查错误输出' }
+$paneId = ($split | ConvertFrom-Json).result.pane.pane_id
+if (-not $paneId) { throw '响应中没有 pane_id，停止启动 Agent' }
+
+herdr agent start implementer --kind codex --pane $paneId
+```
+
+`pane split` 返回 JSON，新面板 ID 在 `.result.pane.pane_id` 中。必须解析实际返回值，不能照抄文档里的 `w1:p2`，也不能根据侧栏顺序猜编号。`--no-focus` 用于保持用户焦点。[3][4]
+
+再创建另一个空闲面板，并以不同名字启动 OpenCode：
+
+```powershell
+$split = herdr pane split --current --direction down --cwd "$PWD" --no-focus
+if ($LASTEXITCODE -ne 0) { throw '创建面板失败，请检查错误输出' }
+$paneId = ($split | ConvertFrom-Json).result.pane.pane_id
+if (-not $paneId) { throw '响应中没有 pane_id，停止启动 Agent' }
+
+herdr agent start documenter --kind opencode --pane $paneId
+```
+
+这里的 `implementer`、`documenter` 是本次运行的 Agent 别名，不是模型名称；`--kind codex` 与 `--kind opencode` 选择的是 Agent 类型。具体模型仍按各 Agent 的配置或原生参数选择，Herdr 不会因为名字叫 `implementer` 就替你切换模型。[3]
+
+### 6.2 先理解一个执行者的完整交互
+
+```powershell
+herdr agent prompt implementer "先只阅读项目，说明主题切换需要修改哪些文件，不要修改文件。" --wait --timeout 120000
+herdr agent get implementer
+herdr agent read implementer --source visible
+```
+
+`--timeout` 单位为毫秒，`recent-unwrapped` 用于读取近期输出并连接软换行。`agent read` 默认直接输出终端文本，不要把它当成包含完整业务结果的 JSON 对象。[3][4]
+
+`agent prompt --wait` 默认等到 `idle`、`done` 或 `blocked` 中的一个状态。因此命令返回后，主控仍应检查状态和内容；返回 `blocked` 可能意味着执行者正在等授权，不是工作已经通过审核。[3]
+
+先用 `visible` 查看当前界面。确认 Agent 空闲后，如需更多历史，再读取较长输出：
+
+```powershell
+herdr agent read implementer --source recent-unwrapped --lines 120
+```
+
+OpenCode 等全屏 Agent 可能把历史保存在备用屏幕中；较长读取需要翻取历史时，若 Agent 仍在工作、阻塞或状态未知，可能返回 `agent_not_idle`。等待失败或遇到阻塞时，先用 `visible` 排查，不要连续扩大 `--lines` 重试。[3]
+
+### 6.3 同时派工，不等于同时等待
+
+完成前置确认、确保两个执行者均可接收新任务后，可以先分别发送任务，再监控状态：
+
+```powershell
+herdr agent prompt implementer "按已确认方案实现主题切换，只修改约定的网页文件。"
+herdr agent prompt documenter "按已确认交互约定更新 README.md，只修改 README.md。"
+herdr agent list
+herdr agent get implementer
+herdr agent get documenter
+```
+
+这里没有使用 `--wait`，两条命令主要负责提交输入，不会因为第一个任务尚未完成就阻止第二个任务被提交。[3]
+
+随后，主控应确认执行者是否真的开始工作，再等待并读取结果：
+
+```powershell
+herdr agent wait implementer --timeout 180000
+herdr agent get implementer
+herdr agent read implementer --source visible
+
+herdr agent wait documenter --timeout 180000
+herdr agent get documenter
+herdr agent read documenter --source visible
+```
+
+这是一组操作示例，不是带有完整故障恢复的编排脚本。尤其要注意：独立的 `agent wait` 遇到已经匹配的状态会立即返回；它不是“等待某个任务 ID 完成”。如果主控没观察到工作开始，也没有可靠的产物证据，就不能把当前 `idle` 当作这次任务完成。`agent prompt --wait` 对从非工作状态提交的新任务提供活动观察检查，但也不按单独的任务轮次跟踪；向已经忙碌的 Agent 追加任务仍有歧义。[3]
+
+确认各执行者空闲后，再按上一节方式读取较长历史并收集交付；如果当前界面是权限弹窗，应先处理授权边界。
+
+因此，首次搭建应先跑通单执行者往返，再增加并行。主控负责维护任务分配与验收记录，不能把生命周期状态直接当作任务数据库。
+
+### 6.4 审核应检查实际交付
+
+在本文的静态网页例子里，主控至少应该检查：
+
+- Codex 是否只修改了约定的网页文件。
+- 主题按钮的行为是否符合约定，原页面功能是否受到影响。
+- README 中的操作步骤、文件名是否与实现一致。
+- 项目已有测试或构建是否执行，退出状态与输出是什么。
+- 没有浏览器验证时，是否明确标为未检查，而不是宣称页面可用。
+
+这些检查属于协作流程设计，不是 Herdr 自带的测试功能。返工时，应给出具体问题和可验证的修复标准，而不是一句“再优化一下”。
+
+## 七、自动协作最容易误判的地方
+
+### 7.1 `done` 不表示验收通过
+
+官方定义中，`idle` 和 `done` 都表示 Agent 可接收输入；`done` 还涉及完成状态是否已被标记为看过。它不是测试成功码。[3]
+
+`unknown` 也不是“差不多做完了”，而是 Herdr 无法可靠判断当前生命周期。主控应读取界面并调查原因，不能直接进入交付。[3]
+
+### 7.2 超时后不要立刻重发
+
+`timeout` 或 `agent_prompt_stalled` 不证明输入没有发送。官方明确要求在重试前检查 Agent，否则可能把同一任务提交两次。[3]
+
+```powershell
+herdr agent get implementer
+herdr agent read implementer --source visible
+```
+
+先判断是仍在工作、等待确认、输入未提交，还是输出读取不完整，再决定下一步。
+
+### 7.3 遇到权限弹窗，不要循环按 Enter
+
+`blocked` 可能对应授权或问题界面。主控应先读出具体内容，涉及安装、外部写入、凭据、费用等边界时交给人确认。Herdr 提供 `agent send-keys` 并不代表可以无条件批准所有请求。[3][10]
+
+自动化可以覆盖常规执行和复审，但删除、部署、支付、提交到外部系统等动作仍应保留明确的授权边界。
+
+### 7.4 多个面板不会自动隔离文件
+
+把两个 Agent 放进不同 Pane，并没有自动创建不同的项目副本。本文示例显式传入同一项目目录，所以必须划分文件所有权。
+
+更复杂的代码任务可考虑 Git worktree。Herdr 有相应工作树管理命令，但创建工作树后还要解决分支整合与测试问题；它不能自动消除语义冲突。[4]
+
+### 7.5 持续运行不是断电后继续执行原进程
+
+Herdr 的后台服务器能让终端在客户端脱离后继续运行。服务器或机器重启后，则是恢复保存的布局，并按支持情况恢复 Agent 会话，原进程不会跨机器重启继续存在。[8]
+
+同样，本机进入睡眠或关机时，不应期待进程还像正常开机一样执行计算。需要长期任务时，应先明确真正承载后台进程的是哪台机器。
+
+### 7.6 多模型不一定更省钱或更快
+
+分工带来了额外的任务描述、上下文传递、审核和返工。是否划算要实际记录总调用量、耗时与任务质量，本文没有运行对照实验，不给出节省比例。
+
+在任务很小、文件高度耦合时，一个 Agent 顺序完成，可能比多个 Agent 来回协调更合适。这是选用协作方案时需要验证的取舍，而非工具性能结论。
+
+## 八、适合怎样使用 Herdr
+
+Herdr 适合把已有的多个编程终端纳入同一套可观察、可控制的运行环境。它的工作区和分屏解决“终端放在哪里”，Agent 状态帮助发现等待输入的助手，CLI 则让主控能实际调度执行者。[3][8]
+
+搭建时建议按下面的顺序递进：
+
+1. 先确认各 Agent 单独可用。
+2. 安装 Herdr，让主控在其面板内启动。
+3. 加载官方 Skill，按需要安装集成。
+4. 跑通一次“发任务—等状态—读结果—检查文件”的单执行者交互。
+5. 再增加执行者，落实文件边界、并行依赖和返工上限。
+
+对于“Claude Code 统筹，Codex、OpenCode 执行”的需求，Herdr 提供了必要的终端控制接口；可靠交付仍取决于任务定义、实际验证与权限管理。让模型接手更多过程，应从能检查的小任务开始，而不是先取消所有人工确认。
+
+## 参考资料
+
+以下资料来自 Herdr 官方网站和官方仓库。安装、CLI 与集成随版本变化，读者应结合当前二进制的 `--help` 和 `--skill` 核对。
+
+## Sources
+
+[2] https://herdr.dev/docs/install
+[3] https://herdr.dev/docs/agent-automation
+[4] https://herdr.dev/docs/cli-reference
+[5] https://herdr.dev/docs/agent-skill
+[6] https://herdr.dev/docs/windows-beta
+[7] https://herdr.dev/docs/integrations
+[8] https://raw.githubusercontent.com/herdrdev/herdr/master/README.md
+[10] https://raw.githubusercontent.com/herdrdev/herdr/master/skills/herdr/SKILL.md
+[11] https://raw.githubusercontent.com/herdrdev/herdr/master/assets/screenshot.png
+[12] https://herdr.dev/assets/og-card-v9.png

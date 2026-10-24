@@ -1,0 +1,30 @@
+[
+  {
+    "url": "https://i-blog.csdnimg.cn/direct/f16d227819a94823aba7eb4601f90bf7.png#pic_center",
+    "resolved_url": "https://i-blog.csdnimg.cn/direct/f16d227819a94823aba7eb4601f90bf7.png#pic_center",
+    "status": 200,
+    "content_type": "image/png",
+    "sha256": "fb762101ab5128fcf1faf70a1360c067e7f2d904c9590da191062f61e4688d27",
+    "rgb_sha256": "e244a527b48cde57e5ef695cce546cd71fe508abb7ca458045a72da870e18db8",
+    "size": [
+      1920,
+      1080
+    ],
+    "local_file": "images/01-herdr-official-interface.png",
+    "byte_identical": true
+  },
+  {
+    "url": "https://i-blog.csdnimg.cn/direct/91c6b59d1c1e4300a4911ce72f769e67.png#pic_center",
+    "resolved_url": "https://i-blog.csdnimg.cn/direct/91c6b59d1c1e4300a4911ce72f769e67.png#pic_center",
+    "status": 200,
+    "content_type": "image/png",
+    "sha256": "c65137fe8de72e5d28a2b1c5a435a249564cc7423af8d4e93e8407e1c42d0fdf",
+    "rgb_sha256": "92485bd650f64b4f36229229d4634604a83c79cbc160ed40b91457e7b8bb790a",
+    "size": [
+      1200,
+      630
+    ],
+    "local_file": "images/02-herdr-official-overview.png",
+    "byte_identical": true
+  }
+]

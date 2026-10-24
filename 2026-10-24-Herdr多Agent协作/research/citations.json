@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": 1,
+      "url": "https://herdr.dev",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 2,
+      "url": "https://herdr.dev/docs/install",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 3,
+      "url": "https://herdr.dev/docs/agent-automation",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 4,
+      "url": "https://herdr.dev/docs/cli-reference",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 5,
+      "url": "https://herdr.dev/docs/agent-skill",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 6,
+      "url": "https://herdr.dev/docs/windows-beta",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 7,
+      "url": "https://herdr.dev/docs/integrations",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 8,
+      "url": "https://raw.githubusercontent.com/herdrdev/herdr/master/README.md",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 9,
+      "url": "https://raw.githubusercontent.com/herdrdev/herdr/master/LICENSE",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 10,
+      "url": "https://raw.githubusercontent.com/herdrdev/herdr/master/skills/herdr/SKILL.md",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 11,
+      "url": "https://raw.githubusercontent.com/herdrdev/herdr/master/assets/screenshot.png",
+      "title": "",
+      "accessed": "2026-10-24"
+    },
+    {
+      "id": 12,
+      "url": "https://herdr.dev/assets/og-card-v9.png",
+      "title": "",
+      "accessed": "2026-10-24"
+    }
+  ]
+}

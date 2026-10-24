@@ -1,0 +1,24 @@
+[
+  {
+    "file": "images/01-herdr-official-interface.png",
+    "url": "https://raw.githubusercontent.com/herdrdev/herdr/master/assets/screenshot.png",
+    "sha256": "fb762101ab5128fcf1faf70a1360c067e7f2d904c9590da191062f61e4688d27",
+    "size": [
+      1920,
+      1080
+    ],
+    "source": "Herdr 官方公开素材；非本机运行截图",
+    "modified": false
+  },
+  {
+    "file": "images/02-herdr-official-overview.png",
+    "url": "https://herdr.dev/assets/og-card-v9.png",
+    "sha256": "c65137fe8de72e5d28a2b1c5a435a249564cc7423af8d4e93e8407e1c42d0fdf",
+    "size": [
+      1200,
+      630
+    ],
+    "source": "Herdr 官方公开素材；非本机运行截图",
+    "modified": false
+  }
+]
