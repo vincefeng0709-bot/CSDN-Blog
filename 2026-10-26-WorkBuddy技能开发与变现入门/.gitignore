@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+
+# Local-only editorial evidence, generated previews and delivery archives.
+/research/
+/*.preview.html
+/*.zip
+/csdn-delivery/
+/verification.md
+/code/dist/
+/code/build_review.py
+/code/test_build_review.py
