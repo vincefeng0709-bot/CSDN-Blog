@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>双栏批注 · External Validation of AI-Assisted Colposcopy (npj Digital Medicine 2026)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#16233f; --navy2:#1f3257; --paper:#faf6ee; --ink:#262626; --muted:#6b6353;
+  --line:#e4dcc9; --cn-bg:#f0ece2; --cn-border:#bfb295;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans','Noto Sans SC',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7}
+
+/* ===== 顶部导航栏 ===== */
+.topbar{background:linear-gradient(135deg,#12203a 0%,#1f3257 60%,#27406b 100%);color:#f5f1e6;padding:26px 28px 20px;border-bottom:4px solid #0d1626}
+.topbar h1{font-family:'Lora','Noto Serif SC',Georgia,serif;font-size:21px;line-height:1.4;margin:0 0 8px;font-weight:600;max-width:960px}
+.tb-meta{margin:0;font-size:12.5px;color:#c3cde2;line-height:1.8}
+.tb-meta b{color:#f0ead8;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.15)}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#e7e3d6}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid rgba(255,255,255,.3);flex:0 0 auto}
+
+/* ===== 章节导航条 ===== */
+.section-nav{position:sticky;top:0;z-index:50;background:rgba(250,246,238,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);display:flex;gap:2px;padding:0 14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.section-nav a{padding:11px 14px;font-size:13px;font-weight:600;color:#6d6350;text-decoration:none;white-space:nowrap;border-bottom:3px solid transparent;transition:color .15s,border-color .15s}
+.section-nav a:hover{color:var(--navy)}
+.section-nav a.active{color:var(--navy);border-bottom-color:var(--navy)}
+
+main{max-width:1260px;margin:0 auto;padding:0 22px 60px}
+.paper-section{padding-top:36px}
+section[id]{scroll-margin-top:48px}
+.row[id],.sub-head{scroll-margin-top:52px}
+
+/* 章节标题 */
+.sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--navy);padding-bottom:9px;margin-bottom:2px}
+.sec-head h2{font-family:'Lora','Noto Serif SC',serif;color:var(--navy);font-size:24px;margin:0;font-weight:600}
+.sec-head .zh{color:#8d846c;font-size:14px;font-weight:500}
+.sub-head{font-family:'Lora','Noto Serif SC',serif;color:#33507b;font-size:16.5px;font-weight:600;margin:26px 0 0;padding:8px 0 6px;border-bottom:1px dashed #cfc5ab}
+
+/* ===== 双栏行 ===== */
+.row{display:grid;grid-template-columns:minmax(0,1.52fr) minmax(0,1fr);border-bottom:1px solid var(--line)}
+.col-left{padding:20px 24px 20px 2px;border-right:1px solid var(--line);min-width:0}
+.col-right{padding:20px 2px 20px 20px;min-width:0}
+.pnum{display:inline-block;font-family:'IBM Plex Sans',sans-serif;font-size:11px;font-weight:700;color:#8d846c;background:#efe9d8;border:1px solid #ddd3b8;border-radius:4px;padding:1px 8px;margin-bottom:8px;letter-spacing:.4px}
+.para-en{font-family:'Lora','Noto Serif SC',Georgia,serif;font-size:15.5px;line-height:1.88;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.para-en sup{font-size:10px;color:#8d846c}
+.para-cn{background:var(--cn-bg);border-left:3px solid var(--cn-border);padding:11px 15px;margin-top:14px;font-family:'Noto Serif SC','Songti SC',SimSun,serif;font-size:14.5px;line-height:1.95;color:#3a352b}
+
+/* 五色高亮 */
+.hl{padding:0 3px;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.hl-thesis{background:#ffe58f}
+.hl-concept{background:#ffc9c2}
+.hl-evidence{background:#c9dcff}
+.hl-rebuttal{background:#cdeec6}
+.hl-method{background:#e3cdfa}
+
+/* ===== 批注卡片 ===== */
+.anno-card{background:#fbf7ec;border-left:4px solid var(--navy);border-radius:0 8px 8px 0;padding:13px 16px;font-size:13px;line-height:1.8}
+.anno-item{margin-bottom:11px}
+.anno-item:last-child{margin-bottom:0}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:1.5px 9px;border-radius:10px;margin-bottom:5px;color:#fff;letter-spacing:.5px}
+.chip-func{background:#1f3257}
+.chip-role{background:#4c6a8d}
+.chip-tip{background:#a3542e}
+.anno-item p{margin:0}
+
+/* ===== 表格 ===== */
+.tbl-cap{font-family:'Lora',serif;font-weight:600;color:var(--navy);font-size:14.5px;margin:0 0 10px}
+.tbl-cap small{color:#8d846c;font-weight:400;font-family:'IBM Plex Sans',sans-serif}
+.tbl-scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px;background:#fff}
+th,td{border:1px solid #d8cfba;padding:5px 8px;text-align:center;white-space:nowrap}
+th{background:#e9edf5;color:var(--navy);font-weight:600}
+td.rh{text-align:left;font-weight:600;color:#3a352b}
+tr.grp td{background:#f4efe0;font-weight:700;text-align:left;color:#4a4335;letter-spacing:.5px}
+.tbl-note{font-size:11.5px;color:#8d846c;margin-top:8px;line-height:1.6}
+
+/* ===== 底部论证总览 ===== */
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:16px 0 8px}
+.flow-node{flex:1 1 180px;background:#fff;border:1px solid var(--line);border-top:4px solid var(--navy);border-radius:6px;padding:11px 13px;font-size:13px;line-height:1.7}
+.flow-node b{color:var(--navy);display:block;margin-bottom:4px;font-size:13.5px}
+.flow-node.rebuttal{border-top-color:#4f9d4f}
+.flow-arrow{align-self:center;color:#a99e83;font-size:20px;font-weight:700;flex:0 0 auto;padding:0 2px}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:18px}
+.ov-card{border-radius:8px;padding:14px 17px;font-size:13.5px;line-height:1.8}
+.ov-card h4{margin:0 0 8px;font-size:14px}
+.ov-claim{background:#fdf6dc;border-left:4px solid #d9a400}
+.ov-claim h4{color:#8a6d00}
+.ov-strong{background:#eef6ee;border-left:4px solid #3f8f3f}
+.ov-strong h4{color:#2c6b2c}
+.ov-weak{background:#fdeeec;border-left:4px solid #c0392b}
+.ov-weak h4{color:#96281b}
+
+footer{border-top:1px solid var(--line);margin-top:40px;padding:18px 28px 30px;font-size:12px;color:#8d846c;line-height:1.8}
+
+@media(max-width:920px){
+  .row{display:block}
+  .col-left{border-right:none;padding-right:2px}
+  .col-right{padding-left:2px;margin-top:6px}
+  .sec-head h2{font-size:20px}
+  .topbar{padding:20px 18px 16px}
+  .topbar h1{font-size:17px}
+  .flow-arrow{display:none}
+  .para-en{font-size:15px}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部导航栏 ================= -->
+<header class="topbar">
+  <h1>External Validation of AI-Assisted Colposcopy Using WHO Dataset for Cervical Precancer and Cancer Detection<br><span style="font-size:14px;font-weight:400;color:#c3cde2;">基于 WHO 数据集的 AI 辅助阴道镜外部验证：宫颈癌前病变与癌症检出</span></h1>
+  <p class="tb-meta">
+    <b>npj Digital Medicine</b> · 2026 · Article in Press · DOI: 10.1038/s41746-026-02961-3 · Open Access (CC BY-NC-ND 4.0)<br>
+    Wu T, Wang Y, Cui X, Huang Y, Wu X, Wu J, Xue P, Qiao Y · 中国医学科学院北京协和医学院 / 中国医科大学附属辽宁省肿瘤医院 / 腾讯优图实验室等<br>
+    文献研读 · 宫颈癌筛查与 AI 辅助阴道镜专题（Cervical Cancer Screening &amp; AI-Assisted Colposcopy）
+  </p>
+  <div class="legend">
+    <span class="legend-item"><span class="sw" style="background:#ffe58f"></span>核心论点 / thesis</span>
+    <span class="legend-item"><span class="sw" style="background:#ffc9c2"></span>关键概念 / 术语</span>
+    <span class="legend-item"><span class="sw" style="background:#c9dcff"></span>实证证据 / 数据</span>
+    <span class="legend-item"><span class="sw" style="background:#cdeec6"></span>让步 / 反驳处理</span>
+    <span class="legend-item"><span class="sw" style="background:#e3cdfa"></span>方法论说明</span>
+  </div>
+</header>
+
+<!-- ================= 章节导航条 ================= -->
+<nav class="section-nav" id="sectionNav">
+  <a href="#abstract">摘要</a>
+  <a href="#intro">引言</a>
+  <a href="#results">结果</a>
+  <a href="#discussion">讨论</a>
+  <a href="#methods">方法</a>
+  <a href="#overview">论证总览</a>
+</nav>
+
+<main>
+
+<!-- ================= 摘要 ================= -->
+<section id="abstract" class="paper-section">
+  <div class="sec-head"><h2>Abstract</h2><span class="zh">摘要</span></div>
+
+  <div class="row" id="p-abs">
+    <div class="col-left">
+      <span class="pnum">¶ 1 · ABSTRACT</span>
+      <div class="para-en">Artificial intelligence (AI)-guided colposcopy has previously been developed to assist colposcopists in detecting <span class="hl hl-concept">cervical intraepithelial neoplasia grade 2 or worse (CIN2+)</span> and guiding biopsies, <span class="hl hl-rebuttal">but internal testing of the AI model could overestimate diagnostic performance</span>. We validated the performance of the AI-guided colposcopy on <span class="hl hl-method">an independent WHO open-source set</span> of <span class="hl hl-evidence">187 patients with 855 colposcopic images</span>. Forty-five colposcopists with different levels of experience from 12 regions in China participated in the validation set. The sensitivity of the AI system on CIN2+ standalone diagnosis were <span class="hl hl-evidence">84.2% (95%CI 74.4–90.7%)</span> in 187 cases. With AI assistance, colposcopist sensitivity increased <span class="hl hl-evidence">from 84.8% (95% CI, 82.7–86.9%) to 90.6% (95% CI, 88.7–92.1%)</span>. The improvement was most evident among low-experienced colposcopists, with <span class="hl hl-evidence">sensitivity increasing by 6.5%, and AUC from 72.4% (95% CI, 67.5–77.3%) to 76.3% (95% CI, 72.3–80.3%; p = 0.043)</span>. AI-guided biopsy support was also associated with a reduction in the mean number of biopsies per case, <span class="hl hl-evidence">from 2.48 to 2.02</span>. <span class="hl hl-thesis">These findings highlight the AI system's robust performance on an independent external dataset and its capacity to bridge the diagnostic experience gap among readers, supporting its clinical implementation as a valuable adjunct for colposcopic assessment.</span></div>
+      <div class="para-cn">此前已有研究开发了 AI 引导的阴道镜系统，用于辅助阴道镜医师检出 CIN2+（宫颈上皮内瘤变 2 级及以上）病变并指导活检，但仅在内部数据上测试的模型，其诊断性能可能被高估。本研究在一套独立的 WHO 开源数据集（187 例患者、855 张阴道镜图像）上对该系统进行外部验证，来自中国 12 个地区、经验层次不同的 45 名阴道镜医师参与其中。在 187 例病例中，AI 系统单独诊断 CIN2+ 的敏感度为 84.2%（95%CI 74.4–90.7%）。AI 辅助下，阴道镜医师的整体敏感度由 84.8% 提升至 90.6%；改善在低年资医师中最为明显——敏感度提高 6.5%，AUC 由 72.4% 升至 76.3%（p = 0.043）。AI 引导的活检支持还使每例平均活检点数由 2.48 降至 2.02。这些结果表明：该 AI 系统在独立外部数据上表现稳健，并有能力弥合不同经验水平阅片者之间的诊断差距，支持其作为阴道镜评估的有价值辅助工具进入临床应用。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>概括研究的问题、方法与核心发现，是全文的"广告位"。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>以"内部验证可能高估性能"设置问题悬念 → 用外部验证数据正面回答 → 预告"弥合经验差距"这条贯穿全文的主线。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>数字密集、结论先行；样本仅 187 例（其中 CIN2+ 仅 76 例）。"robust performance"的措辞强于正文实际结果（总体 ΔAUC 未达显著）——摘要与正文存在轻微的"择优陈述"温差。注意这是 Article in Press 版本，数字定稿可能微调。</p></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= 引言 ================= -->
+<section id="intro" class="paper-section">
+  <div class="sec-head"><h2>Introduction</h2><span class="zh">引言</span></div>
+
+  <div class="row" id="p-i1">
+    <div class="col-left">
+      <span class="pnum">¶ 2 · INTRO-1</span>
+      <div class="para-en"><span class="hl hl-concept">Colposcopy</span> plays a fundamental role in the cervical cancer screening for <span class="hl hl-concept">triage</span> of women with abnormal cytology and/or <span class="hl hl-concept">high-risk human papillomavirus (hr-HPV)</span> infections, significantly contributing to the enhancement of early diagnostic and treatment rates. <span class="hl hl-rebuttal">However, it is highly influenced by subjective visual interpretation and guided biopsies</span>. <span class="hl hl-thesis">Accurate colposcopy is heavily dependent upon the operator's expertise.</span> Colposcopy services remain significant challenges due to <span class="hl hl-concept">low examination reproducibility and lack of standardization</span> in colposcopy equipment and terminology<sup>2,3</sup>. The inaccurate colposcopy examination may result in increased misdiagnosis rates and delayed treatment initiation for patients with <span class="hl hl-concept">high-grade squamous intraepithelial lesions (HSIL)</span>, ultimately increasing the risk of cancer progression<sup>4</sup>. Furthermore, the diagnostic uncertainty stemming from inadequate colposcopic skills among colposcopists in various clinics often leads to additional unnecessary biopsies and diagnostic procedures, exacerbating the strain on already limited healthcare resources.</div>
+      <div class="para-cn">阴道镜检查在宫颈癌筛查中承担着对细胞学异常和/或高危型 HPV 阳性女性进行分流的关键任务，对提高早期诊断与治疗率贡献显著。然而，阴道镜高度依赖主观的视觉判读与引导下活检，其准确性在很大程度上取决于操作者的经验水平。加之检查可重复性低、设备与术语缺乏标准化，阴道镜服务长期面临挑战。不准确的阴道镜检查可能导致高度鳞状上皮内病变（HSIL）患者的误诊率上升、治疗启动延迟，最终增加癌症进展风险。此外，各级医疗机构阴道镜医师技能参差不齐所带来的诊断不确定性，还常常引发额外的不必要活检与诊断操作，进一步加剧本已紧张的医疗卫生资源压力。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>引出问题——先确立阴道镜的地位，再集中暴露其痛点。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>论证链的起点：先扬（地位重要）后抑（主观、依赖经验、可重复性低），为"需要 AI 介入"制造需求。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>经典"先礼后兵"写法，四步因果链（技能不足→误诊→延误→资源紧张）每步都有文献锚点；但链条较长且未逐环给出量化证据，属常识性铺垫而非论证核心。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-i2">
+    <div class="col-left">
+      <span class="pnum">¶ 3 · INTRO-2</span>
+      <div class="para-en">As a solution for subjective medical imaging interpretation, artificial intelligence (AI) is often designed as a <span class="hl hl-concept">clinical decision support tool</span> due to its comparable diagnostic accuracy. In recent years, multiple AI-guided colposcopy systems for cervical precancer and cancer detection have been developed<sup>5–9</sup>. <span class="hl hl-evidence">A standalone AI system has demonstrated sensitivity for detecting high-grade lesions comparable to colposcopy</span><sup>10</sup>, highlighting its potential to address challenges in resource-limited healthcare settings. <span class="hl hl-rebuttal">However, most of these studies rely on internal or non-public validation datasets, which restricts the generalizability of the results globally</span><sup>5,7,11</sup>. <span class="hl hl-rebuttal">Furthermore, such datasets may harbor biases that are not evident until deployment, potentially resulting in unfair and discriminatory AI healthcare outcomes</span>, and limiting efficient integration in existing colposcopy systems. A limited number of preclinical AI research studies have addressed these concerns, such as <span class="hl hl-method">external validation using open-source datasets</span> to assess the generalizability of a model in new environments<sup>12</sup>.</div>
+      <div class="para-cn">为克服医学影像判读的主观性，人工智能常因其可比拟的诊断准确性而被设计为临床决策支持工具。近年来，多个用于宫颈癌前病变及癌症检出的 AI 引导阴道镜系统相继问世，已有独立运行的 AI 系统在高等级病变检出敏感度上与阴道镜检查相当，显示出在资源受限环境中应对上述挑战的潜力。然而，这些研究大多依赖内部或非公开的验证数据集，结果在全球范围的泛化性因此受限；而且，此类数据集可能潜藏直到实际部署才显现的偏倚，可能导致不公平甚至歧视性的 AI 医疗结果，也阻碍其与现有阴道镜体系的高效整合。目前只有少数临床前研究正面回应了这些顾虑，例如利用开源数据集进行外部验证，评估模型在新环境中的泛化能力。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>提出候选方案并制造研究缺口（research gap）。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>承上启下：AI 是对上段问题的回应，但"然而/而且"两连转折把焦点收敛到"外部验证缺失"这一缺口上，为本研究的必要性铺路。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>双重转折结构（AI 有效 → 但数据不公开/有偏倚）是标准的 gap 声明写法；"歧视性结果"的说法提升了伦理紧迫感，但未给出阴道镜 AI 领域的具体实例，属泛化修辞。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-i3">
+    <div class="col-left">
+      <span class="pnum">¶ 4 · INTRO-3</span>
+      <div class="para-en">The WHO/IARC has recently released an <span class="hl hl-method">open-source standardized colposcopy image bank</span> to address the critical needs of cervical cancer screening, by providing a standardized resource for training healthcare professionals and enhancing global cervical cancer screening and early diagnosis capabilities<sup>13</sup>. This dataset contains diverse cervical images captured during colposcopy examinations from various clinical settings, accompanied by expert diagnoses. It facilitates the development of innovative tools such as AI-based systems to improve cervical cancer detection and serves as a valuable resource for <span class="hl hl-method">external validation of AI algorithms</span>. The colposcopy image bank provides a spectrum from precancer to cancer cases for evaluating the <span class="hl hl-concept">generalizability and robustness</span> of these models across various populations and clinical scenarios.</div>
+      <div class="para-cn">WHO/IARC 近期发布了一套开源、标准化的阴道镜图像库，旨在通过为专业人员培训提供标准化资源、提升全球宫颈癌筛查与早期诊断能力，回应筛查领域的关键需求。该数据集收录了来自不同临床场景的多样化宫颈图像，并附有专家诊断，既可用于开发基于 AI 的创新检测工具，也是对 AI 算法进行外部验证的宝贵资源。图像库覆盖从癌前病变到癌症的完整疾病谱，可用于评估模型在不同人群与临床场景下的泛化性与稳健性。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>引入关键资源，补上缺口拼图。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>为方法选择提供正当性：WHO/IARC 图像库 = 解决上段"数据不公开"缺口的现成工具。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>借 WHO/IARC 的权威性为研究背书；注意本段是"资源介绍"而非证据，其"标准化"程度要到 Methods 部分才能检验。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-i4">
+    <div class="col-left">
+      <span class="pnum">¶ 5 · INTRO-4</span>
+      <div class="para-en">In this study, we expanded the retrospective dataset and integrated an independent WHO open-source dataset for <span class="hl hl-method">external testing</span> of an AI-guided colposcopy system for detecting <span class="hl hl-concept">CIN2+</span> and guiding biopsy efficiency<sup>13</sup>. The Food and Drug Administration (FDA) recommends a <span class="hl hl-method">multiple-reader multiple-case (MRMC) study design</span> as a validation method for assessing the benefit of clinical AI solutions<sup>14</sup>, which assesses the performance of a set of colposcopists interpreting images under different modalities, with and without AI. <span class="hl hl-thesis">We aimed to compare its diagnostic performance with those of colposcopists and study whether the performance of colposcopists improves when they are provided with AI assistance.</span></div>
+      <div class="para-cn">在本研究中，我们扩充了回顾性数据集，并整合独立的 WHO 开源数据集，对一款用于检出 CIN2+ 并指导活检的 AI 引导阴道镜系统进行外部测试。美国 FDA 推荐采用多阅片者多病例（MRMC）研究设计作为评估临床 AI 产品获益的验证方法——即让一组阴道镜医师在有无 AI 两种模式下分别判读图像。我们旨在将该系统的诊断性能与阴道镜医师进行比较，并研究医师在获得 AI 辅助后表现是否改善。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>陈述研究目标与设计合法性，收束引言。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>把缺口转化为两个明确的研究问题：①AI 单独 vs 医师；②辅助 vs 无辅助。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>借 FDA 对 MRMC 的推荐为方法学背书，增强可信度；但"guiding biopsy efficiency"在目标句中出现，其评估口径的局限直到讨论部分才交代。</p></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= 结果 ================= -->
+<section id="results" class="paper-section">
+  <div class="sec-head"><h2>Results</h2><span class="zh">结果</span></div>
+
+  <div class="sub-head">AI system vs. colposcopist diagnostic performance｜AI 系统与阴道镜医师的诊断性能对比</div>
+
+  <div class="row" id="p-r1">
+    <div class="col-left">
+      <span class="pnum">¶ 6 · RESULTS-1</span>
+      <div class="para-en">A total of 187 cases were included in this study, <span class="hl hl-evidence">111 cases were scored as benign and CIN1, and 76 cases were scored as CIN2+ histology</span>. Reader-level diagnostic performance metrics are summarized in Table 1. The AI system achieved <span class="hl hl-evidence">a sensitivity of 84.2% (95% CI 74.4–90.7%) and a specificity of 55.9% (95% CI 46.6–64.7%)</span> for CIN2+ detection. Across the 30 colposcopists, the overall reader performance showed a similar <span class="hl hl-evidence">sensitivity of 84.2% (95% CI 81.3–87.0%) and a specificity of 58.0% (95% CI 52.1–63.9%)</span>. <span class="hl hl-rebuttal">However, performance differed by experience level.</span> The sensitivity of low-experienced colposcopists was significantly lower than AI system <span class="hl hl-evidence">(78.6%, 95%CI 74.7–83.2% vs. 84.2%, 95%CI 74.4–90.7%)</span>. 21 high-experienced colposcopists showed a much higher sensitivity <span class="hl hl-evidence">(88.5%, 95%CI 85.8–91.1% vs. 78.6%, 95%CI 74.7–83.2%)</span> and a lower specificity <span class="hl hl-evidence">(56.0%, 95%CI 51.6–60.3% vs. 58.3%, 95%CI 54.3–62.0%)</span>, compared to 9 low-experienced colposcopists. <span class="hl hl-method">Figure 1 presents confusion matrix heatmaps</span> for the AI system (case-level) and pooled colposcopist assessments (read-level), illustrating CIN2+ detection error patterns stratified by experience level. We also performed <span class="hl hl-method">a sensitivity analysis restricted to the Lugol-free subset</span> <span class="hl hl-evidence">(n = 42; 28 CIN2+ and 14 &lt; CIN2)</span>. In this modality-matched subset, the overall performance pattern remained consistent with the primary analysis. The AI system achieved sensitivity comparable to high-experienced colposcopists, suggesting that its diagnostic accuracy is driven by acetic acid imaging and does not depend on Lugol's iodine (Supplementary Table S1).</div>
+      <div class="para-cn">本研究共纳入 187 例病例，其中 111 例组织学为良性/CIN1，76 例为 CIN2+。阅片者层面的诊断性能汇总于表 1。AI 系统检出 CIN2+ 的敏感度为 84.2%（95% CI 74.4–90.7%），特异度为 55.9%（95% CI 46.6–64.7%）。30 名阴道镜医师的整体表现与之接近：敏感度 84.2%、特异度 58.0%。但按经验分层后差异显现：低年资医师的敏感度显著低于 AI 系统（78.6% vs 84.2%）；21 名高年资医师的敏感度（88.5%）远高于 9 名低年资医师（78.6%），特异度则略低（56.0% vs 58.3%）。图 1 以混淆矩阵热图呈现 AI（病例级）与医师（阅片级）按经验分层的 CIN2+ 检出错误模式。我们另对不含 Lugol 液的子集（n = 42；28 例 CIN2+、14 例 &lt;CIN2）做了敏感性分析：这一模态匹配子集中的总体表现与主分析一致，AI 的敏感度与高年资医师相当，提示其诊断准确性由醋酸白成像驱动、并不依赖碘染（补充表 S1）。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>提供证据——AI 与医师的基线对比。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>第一组结果，确立"AI ≈ 全体医师平均水平，但 &lt; 高年资、&gt; 低年资"的格局，为后文"AI 能拉平差距"埋下伏笔。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>Lugol-free 敏感性分析是本段方法学亮点（控制了模态差异混杂）。注意：AI 的 95%CI 极宽（74.4–90.7，因 AI 只是"一个读者"），与医师的 CI 性质不同、不可直接比较；"significantly lower"未附 p 值。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="t1">
+    <div class="col-left">
+      <span class="pnum">表 1</span>
+      <p class="tbl-cap">Table 1 ｜ CIN2+ Diagnosis Performance of AI System and Colposcopists <small>（AI 系统与阴道镜医师的 CIN2+ 诊断性能）</small></p>
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="text-align:left">Reader / 阅片者</th><th>Sensitivity % (95% CI)</th><th>Specificity % (95% CI)</th><th>PPV % (95% CI)</th><th>NPV % (95% CI)</th></tr>
+        <tr><td class="rh">AI system</td><td>84.2 (74.4–90.7)</td><td>55.9 (46.6–64.7)</td><td>56.6 (47.4–65.4)</td><td>83.8 (73.8–90.5)</td></tr>
+        <tr><td class="rh">All readers 全体</td><td>84.2 (81.3–87.0)</td><td>58.0 (52.1–63.9)</td><td>59.5 (55.9–63.2)</td><td>83.9 (81.6–86.2)</td></tr>
+        <tr><td class="rh">Low-experienced 低年资</td><td>78.6 (74.7–83.2)</td><td>58.3 (54.3–62.0)</td><td>57.0 (50.6–63.0)</td><td>79.5 (74.4–84.5)</td></tr>
+        <tr><td class="rh">High-experienced 高年资</td><td>88.5 (85.8–91.1)</td><td>56.0 (51.6–60.3)</td><td>58.5 (52.6–64.1)</td><td>87.3 (83.8–91.1)</td></tr>
+      </table>
+      </div>
+      <p class="tbl-note">PPV 阳性预测值；NPV 阴性预测值；CI 置信区间。人机对比研究（n = 30 名医师：9 低年资 + 21 高年资）。</p>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">表格导读</span><p>证据汇总：AI 敏感度与"全体医师"持平，特异度低于任何一组医师；高年资组的 NPV（87.3%）全场最高。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>统计单位不一致：AI 是病例级（每例 1 个判断），医师是阅片级（30 人判断的汇总）——CI 宽度与解释都不能直接对读；AI 的特异度 CI（46.6–64.7）下限已接近抛硬币。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="sub-head">AI-assisted vs. unassisted colposcopist performance and variability｜AI 辅助 vs 无辅助：MRMC 表现与变异</div>
+
+  <div class="row" id="p-r2">
+    <div class="col-left">
+      <span class="pnum">¶ 7 · RESULTS-2</span>
+      <div class="para-en">By the end of <span class="hl hl-method">two reading phases</span>, 15 colposcopists completed the interpretation of the colposcopic images, with and without AI system in a total of <span class="hl hl-evidence">5,610 reading records</span>. AI assistance numerically improved discrimination for CIN2+ across all readers, with AUC increasing <span class="hl hl-evidence">from 72.8% (95% CI, 68.4–77.1%) without AI to 76.5% (95% CI, 72.9–80.1%) with AI</span>; <span class="hl hl-rebuttal">however, the overall difference did not reach statistical significance (ΔAUC = 3.7%, 95% CI, −0.1–7.5%)</span>. Low-experienced colposcopists (n = 11) had AUC changes in AI-assisted and unassisted scenarios of <span class="hl hl-evidence">72.4% (95% CI, 67.5–77.3%) to 76.3% (95% CI, 72.3–80.3%)</span>, corresponding to <span class="hl hl-evidence">a ΔAUC of 3.9% (95% CI, 0.1% to 7.8%; p = 0.043)</span>, which was significantly improved in diagnosis with AI assistance. For high-experienced colposcopists (n = 4), the AI-assisted AUC was also numerically higher than the unassisted AUC, increasing <span class="hl hl-evidence">from 73.8% (95% CI, 67.9–79.8%) to 76.9% (95% CI, 71.8–81.9%) (ΔAUC = 3.0%; 95% CI, −7.5–13.5%)</span>. The overall performance for colposcopists with and without AI assistance was visualized in AUC-ROC curve (Fig. 2).</div>
+      <div class="para-cn">两阶段阅片结束时，15 名阴道镜医师在有无 AI 两种条件下完成了全部图像判读，共产生 5,610 条阅片记录。AI 辅助使全体阅片者对 CIN2+ 的判别能力在数值上提升：AUC 由无辅助的 72.8% 升至有辅助的 76.5%，但总体差异未达统计显著（ΔAUC = 3.7%，95% CI −0.1–7.5%）。低年资组（n = 11）的 AUC 由 72.4% 升至 76.3%，ΔAUC = 3.9%（95% CI 0.1–7.8%，p = 0.043），AI 辅助下的诊断改善具有统计学意义。高年资组（n = 4）的 AUC 亦在数值上更高（73.8% → 76.9%），但 ΔAUC = 3.0%（95% CI −7.5–13.5%），差异不显著。全体阅片者两种条件下的总体表现见图 2 的 AUC-ROC 曲线。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>提供证据——MRMC 预设主终点（ΔAUC）。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>全文的关键转折：主终点在总体上未达显著，显著性只出现在低年资亚组——这决定了全文论证必须"下沉"到亚组层面展开。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>诚实报告总体不显著，值得肯定；但随之把论证重心移向显著的亚组，有"亚组挑拣"之嫌（且未做经验×辅助的交互检验）。高年资组仅 4 人，CI 宽达 −7.5–13.5%，该组阴性结果几乎没有统计效力。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-r3">
+    <div class="col-left">
+      <span class="pnum">¶ 8 · RESULTS-3</span>
+      <div class="para-en">The detection of sensitivity in CIN2+ by all colposcopists was significantly increased with AI assistance <span class="hl hl-evidence">(90.6%, 95%CI 88.7–92.1% vs. 84.8%, 95%CI 82.7–86.9%)</span>. In the low-experienced colposcopist group, the diagnostic sensitivity <span class="hl hl-evidence">rose 6.5% (88.7%, 95%CI 86.4–90.7% vs. 82.2%, 95%CI 79.4–84.6%)</span> by assisting with the AI system. The specificity was also significantly increased <span class="hl hl-evidence">(63.9%, 95%CI 61.2–66.5% vs. 62.6%, 95%CI 59.8–65.2%)</span>, <span class="hl hl-rebuttal">but not in high-experienced colposcopists</span>. The diagnosis performance of colposcopists with and without AI assistance was shown in Table 2. When AI assisted in the diagnosis of all colposcopists, the accuracy was increased to <span class="hl hl-evidence">73.6% (95% CI 71.9–75.2%) from 70.4% (95%CI 68.7–72.0%)</span>. Kappa value for high-experienced colposcopists was higher than for low-experienced colposcopists, and showed an improvement across the two scenarios in both experienced-level colposcopists. <span class="hl hl-thesis">The overall performance of AI-assisted colposcopist diagnosis on CIN2+ was improved when compared with colposcopist interpretation.</span></div>
+      <div class="para-cn">AI 辅助下，全体医师检出 CIN2+ 的敏感度显著提高（90.6% vs 84.8%）。低年资组的诊断敏感度上升 6.5%（88.7% vs 82.2%）；特异度亦显著提高（63.9% vs 62.6%），但高年资组未见显著变化。各条件下的诊断性能见表 2。AI 辅助使全体医师的准确度由 70.4% 升至 73.6%。高年资医师的 Kappa 值高于低年资医师，且两组在辅助条件下均有所改善。总体而言，AI 辅助下的 CIN2+ 诊断表现优于医师独立判读。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>提供证据——次要终点（敏感度/特异度/准确度/一致性）。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>用一组描述性指标继续支撑"AI 有益"：敏感度与准确度全面小幅上行，且特异度不降反升——预先回应了"AI 只会催人报阳性"的隐忧。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>特异度的"显著"提升仅 1.3 个百分点（62.6→63.9）；这些次要指标用 bootstrap CI 做描述性比较，容易夸大"显著"，且未做多重比较校正。段末句是全段的"论点化"收束。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="t2">
+    <div class="col-left">
+      <span class="pnum">表 2</span>
+      <p class="tbl-cap">Table 2 ｜ The performance of AI-assisted and unassisted colposcopist on CIN2+ diagnosis <small>（有无 AI 辅助下阴道镜医师的 CIN2+ 诊断性能）</small></p>
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="text-align:left">指标</th><th style="text-align:left">组别</th><th>Without AI 无辅助</th><th>With AI 辅助</th><th>P 值</th></tr>
+        <tr class="grp"><td colspan="5">Accuracy 准确度 %</td></tr>
+        <tr><td></td><td class="rh">All readers</td><td>70.4 (68.7–72.0)</td><td>73.6 (71.9–75.2)</td><td>–</td></tr>
+        <tr><td></td><td class="rh">Low-experienced</td><td>70.4 (68.4–72.4)</td><td>73.8 (71.8–75.7)</td><td>–</td></tr>
+        <tr><td></td><td class="rh">High-experienced</td><td>70.2 (66.8–73.4)</td><td>73.1 (69.8–76.2)</td><td>–</td></tr>
+        <tr class="grp"><td colspan="5">Sensitivity 敏感度 %</td></tr>
+        <tr><td></td><td class="rh">All readers</td><td>84.8 (82.7–86.9)</td><td>90.6 (88.7–92.1)</td><td>–</td></tr>
+        <tr><td></td><td class="rh">Low-experienced</td><td>82.2 (79.4–84.6)</td><td>88.7 (86.4–90.7)</td><td>–</td></tr>
+        <tr><td></td><td class="rh">High-experienced</td><td>92.3 (88.8–94.8)</td><td>95.6 (92.7–97.5)</td><td>–</td></tr>
+        <tr class="grp"><td colspan="5">Specificity 特异度 %</td></tr>
+        <tr><td></td><td class="rh">All readers</td><td>60.7 (58.3–63.0)</td><td>62.3 (60.0–64.6)</td><td>–</td></tr>
+        <tr><td></td><td class="rh">Low-experienced</td><td>62.6 (59.8–65.2)</td><td>63.9 (61.2–66.5)</td><td>–</td></tr>
+        <tr><td></td><td class="rh">High-experienced</td><td>55.4 (50.7–59.9)</td><td>58.0 (53.4–62.5)</td><td>–</td></tr>
+        <tr class="grp"><td colspan="5">PPV 阳性预测值 %</td></tr>
+        <tr><td></td><td class="rh">All readers</td><td>59.1 (56.7–61.5)</td><td>61.6 (59.3–64.0)</td><td>–</td></tr>
+        <tr><td></td><td class="rh">Low-experienced</td><td>59.5 (56.6–62.3)</td><td>62.2 (59.4–64.9)</td><td>–</td></tr>
+        <tr><td></td><td class="rh">High-experienced</td><td>58.1 (53.6–62.4)</td><td>60.4 (56.0–64.7)</td><td>–</td></tr>
+        <tr class="grp"><td colspan="5">NPV 阴性预测值 %</td></tr>
+        <tr><td></td><td class="rh">All readers</td><td>85.7 (83.5–87.6)</td><td>90.8 (89.0–92.3)</td><td>–</td></tr>
+        <tr><td></td><td class="rh">Low-experienced</td><td>84.0 (81.5–86.2)</td><td>89.4 (87.2–91.3)</td><td>–</td></tr>
+        <tr><td></td><td class="rh">High-experienced</td><td>91.5 (87.6–94.3)</td><td>95.2 (92.0–97.2)</td><td>–</td></tr>
+        <tr class="grp"><td colspan="5">AUC（主终点）</td></tr>
+        <tr><td></td><td class="rh">All readers</td><td>72.8 (68.4–77.1)</td><td>76.5 (72.9–80.1)</td><td>0.057</td></tr>
+        <tr><td></td><td class="rh">Low-experienced</td><td>72.4 (67.5–77.3)</td><td>76.3 (72.3–80.3)</td><td>0.043</td></tr>
+        <tr><td></td><td class="rh">High-experienced</td><td>73.8 (67.9–79.8)</td><td>76.9 (71.8–81.9)</td><td>0.427</td></tr>
+      </table>
+      </div>
+      <p class="tbl-note">a. p 值仅对主终点（AUC）用 iMRMC 框架计算以处理相关阅片；b. 次要二分类指标为描述性评估，用病例级 bootstrap 95% CI。低年资 = 3–5 年经验；高年资 = &gt;5 年经验。</p>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">表格导读</span><p>MRMC 两阶段全部指标的完整对照：几乎每一格都是"辅助 &gt; 无辅助"，但只有 AUC 行给出 p 值（0.057 / 0.043 / 0.427）。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>高年资敏感度基线已达 92.3%，天花板效应明显，改善空间天然受限；"–"的 p 值列提示读者：除 AUC 外的"显著"只是 CI 不含 0 的描述性说法。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="sub-head">Biopsy concordance and reader confidence｜活检一致性与阅片者信心</div>
+
+  <div class="row" id="p-r4">
+    <div class="col-left">
+      <span class="pnum">¶ 9 · RESULTS-4</span>
+      <div class="para-en">Only 76 CIN2+ cases were asked by colposcopists to indicate <span class="hl hl-method">no more than four biopsy sites</span> with and without AI-guided biopsies recommendation. The average number of biopsies by the case was reduced <span class="hl hl-evidence">from 2.48 to 2.02</span> with AI assisted. For the 76 cases evaluated, the PPB was increased in the scenario of AI-assisted diagnosis by low-experienced colposcopists alone <span class="hl hl-evidence">(Median [IQR]: 0.86 [0.48–1.00] vs. 0.80 [0.37–1.00]; p = 0.0305)</span>. <span class="hl hl-rebuttal">The high-experienced colposcopists show a not significant increase of PPB</span>, since the higher inter variability. All colposcopists showed an increase in confidence in diagnosis with AI assistance <span class="hl hl-evidence">(69.4 vs. 77.8)</span>, was shown in Fig. 3. The confidence boost was particularly pronounced in low-experienced colposcopists, with an improvement of <span class="hl hl-evidence">10 points (from 67.4 to 77.4)</span>, while high-experienced colposcopists showed a <span class="hl hl-evidence">5-point increase (from 74.9 to 79.1)</span>. We conducted a subgroup analysis on confidence regarding CIN2+ cases, and the results showed that low-experienced colposcopists still had a significant confidence improvement <span class="hl hl-evidence">(from 66.8 to 77.5)</span>, while high-experienced colposcopists' confidence increased by <span class="hl hl-evidence">about 2 points (from 75.1 to 76.9)</span>.</div>
+      <div class="para-cn">医师在有无 AI 活检引导建议两种条件下，对 76 例 CIN2+ 病例标注活检点（每例不超过 4 个）。AI 辅助使每例平均活检点数由 2.48 降至 2.02。在评估的 76 例中，仅低年资医师在 AI 辅助下的活检点准确率（PPB）显著提高（中位数 [IQR]：0.86 [0.48–1.00] vs 0.80 [0.37–1.00]，p = 0.0305）；高年资医师的 PPB 提升不显著，与阅片者间变异较大有关。所有医师在 AI 辅助下诊断信心均提升（69.4 → 77.8，图 3）：低年资医师提升最明显（+10 分，67.4 → 77.4），高年资医师提升 5 分（74.9 → 79.1）。针对 CIN2+ 病例的亚组分析显示，低年资医师信心改善依然显著（66.8 → 77.5），高年资医师仅提升约 2 分（75.1 → 76.9）。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>提供证据——活检行为与主观信心两条"软终点"。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>从"判得准"扩展到"取得巧"：活检更少 + 信心更高，把 AI 的价值从准确度延伸到操作效率与临床心理层面。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>活检数下降是双刃剑——可解读为"效率提升"，也可解读为"AI 影响下漏取风险"，作者未讨论后者。信心提升本身不是临床终点（信心 ↑ 未必准确 ↑）；活检分析仅基于 76 例 CIN2+，统计效力有限。</p></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= 讨论 ================= -->
+<section id="discussion" class="paper-section">
+  <div class="sec-head"><h2>Discussion</h2><span class="zh">讨论</span></div>
+
+  <div class="row" id="p-d1a">
+    <div class="col-left">
+      <span class="pnum">¶ 10 · DISC-1（上）</span>
+      <div class="para-en">In our publicly available dataset based multireader multicase external validation study across Chinese various experience-level colposcopist, the effect of AI-assisted diagnosis performance of colposcopic examination was significantly improved. This study resulted the generalization capability of AI-guided colposcopic system, CAIADS, and statistical clinical evaluation of AI-assisted diagnostic capacity. <span class="hl hl-thesis">CAIADS demonstrated promising accuracy in enhancing high-grade lesion detection rates and reducing the risk of missed diagnoses</span>, which was similar to few previous studies<sup>5,9,15</sup>. Regarding its independent diagnostic performance, the AI system demonstrated higher sensitivity in detecting CIN2+ cases but exhibited lower specificity when evaluated on the WHO/IARC dataset. In view of this external validation, <span class="hl hl-thesis">the AI system is comparable in its ability to detect CIN2+ to that of colposcopists with approximately five years of experience</span>. It identified <span class="hl hl-evidence">113 cases as positive with 84.2% sensitivity, but only 64 were confirmed as true positives, with a significant 43.4% of normal or low-grade lesions misclassified as CIN2+</span>. <span class="hl hl-rebuttal">When trained, the model was optimized to prioritize sensitivity to avoid missing high-grade cases.</span> The standalone AI system showed slightly lower specificity than colposcopists <span class="hl hl-evidence">(55.9% vs 58.0%)</span>, suggesting a higher <span class="hl hl-concept">false-positive rate</span> despite its high sensitivity for CIN2+ detection. This tradeoff may lead to unnecessary biopsies and reflects the current limitation of AI in more refined lesion-grade discrimination. <span class="hl hl-rebuttal">However, the high negative predictive value (83.8%) indicates good reliability for ruling out CIN2+ disease, which may support low-risk stratification.</span></div>
+      <div class="para-cn">在这项基于公开数据集、覆盖中国不同经验水平阴道镜医师的多阅片者多病例外部验证研究中，AI 辅助显著改善了阴道镜检查的诊断表现。研究检验了 AI 引导阴道镜系统 CAIADS 的泛化能力，并对 AI 辅助的诊断能力做了统计学临床评估。CAIADS 在提高高等级病变检出率、降低漏诊风险方面表现出良好准确性，与既往少数研究一致。就其独立诊断性能而言，AI 系统在 WHO/IARC 数据集上检出 CIN2+ 的敏感度较高，但特异度偏低；就本次外部验证而言，其检出 CIN2+ 的能力约相当于具有 5 年左右经验的阴道镜医师。系统共判出 113 例阳性，敏感度 84.2%，但其中仅 64 例为真阳性——43.4% 的正常或低级别病变被误判为 CIN2+。模型在训练时被刻意优化为优先保证敏感度、避免漏掉高等级病变，因此其特异度（55.9%）略低于医师（58.0%），假阳性率更高。这种权衡可能导致不必要的活检，也反映出 AI 在更精细病变分级判别上的现有局限。不过，其较高的阴性预测值（83.8%）表明在排除 CIN2+ 方面可靠性良好，可支持低风险分层。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>总结核心结果，并主动直面"敏感度—特异度权衡"这一最大软肋。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>讨论开篇总述：先给结论（泛化成功），再自曝 43.4% 误判率，随后以 NPV 高这条证据完成对软肋的第一层对冲。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>主动亮出误判率体现透明度；"训练时优先敏感度"的解释合理但属事后解释（trained to prioritize）。"AI ≈ 5 年经验医师"是从敏感度单指标得出的类比，特异度并不匹配。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d1b">
+    <div class="col-left">
+      <span class="pnum">¶ 11 · DISC-1（下）</span>
+      <div class="para-en">Notably, AI assistance improved specificity in both low-experienced and high-experienced readers, with a significant improvement in low-experienced readers and a similar increasing trend in high-experienced readers. These findings suggest that, <span class="hl hl-rebuttal">although the standalone AI model may overcall some abnormalities</span>, <span class="hl hl-thesis">its integration into clinical assessment can still improve the specificity of colposcopic decision-making by helping readers standardize interpretation and avoid biopsy of less relevant lesions</span>. Therefore, there seems to be a persisting <span class="hl hl-concept">internal bias</span>, possibly resulting from the model's <span class="hl hl-method">reliance on certain features, such as brightness, contrast, or color variations, as discriminating factors</span>. Designed external validation studies serve to evaluate the generalization capability of the CAIADS and offer evident insights to guide further optimization by identifying its limitations. The diagnostic results of a number of colposcopists using an AI-guided colposcopy system in this study demonstrated the potential of this system to prevent missed diagnoses in different clinical settings.</div>
+      <div class="para-cn">值得注意的是，AI 辅助提升了两组阅片者的特异度——低年资组改善显著，高年资组呈类似上升趋势。这提示：尽管独立运行的 AI 模型可能"报多"，但将其整合进临床评估后，反而能通过帮助医师统一判读标准、避免对不太相关部位的活检，提高阴道镜决策的特异度。因此，系统似乎存在一种持续性内部偏倚，可能源于模型把亮度、对比度或颜色变化等特征当作判别依据。针对性设计的外部验证研究既能评估 CAIADS 的泛化能力，也能通过暴露局限为后续优化指明方向。本研究中多名阴道镜医师使用该系统的诊断结果，展示了其在不同临床场景下防止漏诊的潜力。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>完成对软肋的第二层对冲，并指出改进方向。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>论证的关键一跃：从"AI 单独特异度低"翻转到"整合后反而提升特异度"——把系统的缺陷转化为"人机协同"价值的证据。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>"标准化判读"机制是合理假说而非已证事实（未分析医师改判与 AI 输出的对应关系）；"internal bias 源于亮度/颜色特征"是推测，无消融实验支撑——但作为外部验证研究的"发现局限"功能，作者的处理是诚实的。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d2a">
+    <div class="col-left">
+      <span class="pnum">¶ 12 · DISC-2（上）</span>
+      <div class="para-en"><span class="hl hl-thesis">There are several limitations to this study.</span> First, the publicly available image data sets were utilized for diagnosis with the lack of relevant primary screening information, where <span class="hl hl-rebuttal">colposcopists were only able to simulate the colposcopic examination</span>. In real clinical practices, women who have abnormal hr-HPV test or cytology results are typically referred for colposcopic examination. Many colposcopic findings and diagnostic criteria need to take into account the results of hr-HPV testing or cytology. <span class="hl hl-rebuttal">However, the advantage of using public data is its reproducibility for other researchers.</span> Future studies should aim to integrate CAIADS into colposcopes from various vendors and evaluate its performance in real-time within a multicenter clinical setting by <span class="hl hl-method">a prospective study design</span>. Secondly, the MRMC study design offers improvement in the statistical power and objectivity of clinical studies by mitigating biases caused by variations in reader experience in which diagnostic AI equipment is used. It reduces sample size requirements by incorporating multiple readers, which accounts for inter-reader variability and enhances the statistical efficiency of the trial. <span class="hl hl-rebuttal">However, reading order bias is the potential limitation</span>, where readers may be influenced by information from previous cases and diagnostic modes, despite efforts to randomize the reading order. Additionally, <span class="hl hl-rebuttal">confirmation bias may occur in MRMC studies where binary test results are preferentially selected for gold-standard validation</span>, potentially skewing the assessment of diagnostic performance, especially in retrospective studies.</div>
+      <div class="para-cn">本研究存在若干局限。首先，诊断所用的是公开图像数据集，缺乏相关初筛信息，阴道镜医师只能"模拟"阴道镜检查——而真实临床中，通常是 hr-HPV 或细胞学异常的女性才被转诊行阴道镜，许多阴道镜所见与诊断标准都需要结合 hr-HPV 或细胞学结果来解读。当然，公开数据的优势在于可供其他研究者复现。未来研究应把 CAIADS 集成到不同厂商的阴道镜设备中，并以前瞻性设计在多中心临床场景下实时评估其性能。其次，MRMC 设计通过缓解阅片者经验差异带来的偏倚，提高了临床研究的统计效力与客观性——纳入多名阅片者可降低样本量需求、兼顾阅片者间变异、提升试验统计效率。但阅片顺序偏倚仍是潜在问题：尽管做了顺序随机化，阅片者仍可能受前一病例与前一诊断模式的信息影响。此外，MRMC 研究中若二分类结果被优先选入金标准验证，可能产生确认偏倚，回顾性研究中尤甚，从而歪曲诊断性能评估。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>陈述局限（数据层面 + 设计层面）。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>"让步—转折"集中营：每条局限后紧跟一条"但是"（公开数据→可复现；顺序偏倚→已随机化），维持"结论仍站得住"的姿态。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>三条"但是"都没有用数据回应局限本身（例如未做按初筛结果分层的敏感性分析）。"确认偏倚"一条尤其值得注意：回顾性金标准的选择方式本身会扭曲性能估计——这是外部验证研究的共性软肋。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d2b">
+    <div class="col-left">
+      <span class="pnum">¶ 13 · DISC-2（中）</span>
+      <div class="para-en">Additionally, our study focused exclusively on evaluating the diagnostic performance of AI-assisted colposcopists for detecting CIN2+ cases. Considering the limited diagnostic skills of colposcopists in <span class="hl hl-concept">low- and middle-income countries (LMICs)</span>, AI support is the emphasis on enhancing the detection of high-grade lesions within a short period and improving cervical cancer screening rates. <span class="hl hl-rebuttal">However, the classification of CIN1/CIN2 also carries critical implications for clinical management and decision-making.</span> Due to CIN2 possibly turning negative, accurate specificity indicates a potential <span class="hl hl-concept">overdiagnosis</span> and over-biopsy reduction. Thus, the capability of AI to differentiate between CIN1, CIN2, and CIN3 requires rigorous evaluation and scientific validation.</div>
+      <div class="para-cn">另外，本研究仅评估了 AI 辅助阴道镜医师检出 CIN2+ 的诊断性能。考虑到中低收入国家（LMIC）阴道镜医师诊断技能有限，AI 支持的重点在于短期内提高高等级病变检出率、改善筛查率。然而 CIN1/CIN2 的区分同样对临床管理与决策影响重大——由于 CIN2 可能自行消退，准确的特异度意味着潜在的过度诊断与过度活检的减少。因此，AI 区分 CIN1、CIN2 与 CIN3 的能力仍需严格评估与科学验证。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>第三条局限：终点粒度（只看 CIN2+）。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>承认"CIN1/CIN2 区分"是本研究的盲区，同时把它与特异度/过度诊断议题挂钩，为下文的辩护铺垫。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>用 LMIC 的现实需求论证"CIN2+ 优先"的合理性——诉诸情境的辩护；但"需要严格验证"的承诺由未来研究承担，本文自身并未提供 CIN 分级辨别的任何数据。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d2c">
+    <div class="col-left">
+      <span class="pnum">¶ 14 · DISC-2（下）</span>
+      <div class="para-en"><span class="hl hl-thesis">The robustness of this study is grounded in its methodological design.</span> By leveraging <span class="hl hl-method">an independent public dataset alongside a MRMC framework</span>, we ensured high transparency while rigorously accounting for inter-reader variability. First, an independent publicly available dataset was used, which improves the reproducibility and transparency of the study and allows benchmarking under the same conditions. In addition, the comparison between standalone and AI-assisted reading <span class="hl hl-method">under the same framework</span> allowed a direct assessment of the incremental value of AI assistance across readers with different experience levels.</div>
+      <div class="para-cn">本研究的稳健性植根于其方法学设计：借助独立公开数据集与 MRMC 框架，在严格考虑阅片者间变异的同时保证了高度透明。独立公开数据集提升了研究的可复现性与透明度，支持同条件下的基准比较；同一框架下"独立阅片 vs 辅助阅片"的对照，则可直接量化 AI 辅助对不同经验水平阅片者的增量价值。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>局限陈述后的"回摆"：重申设计优势。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>把前面承认的每条局限翻转为方法学卖点（公开=可复现、MRMC=控变异），完成"局限—优势"的对称收束。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>标准的"自辩段"结构；同一批属性（公开、MRMC）既是局限的来源也是优势的来源，作者的选择性强调值得读者自行权衡。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d3">
+    <div class="col-left">
+      <span class="pnum">¶ 15 · DISC-3</span>
+      <div class="para-en">In the cervical cancer screening pathway, colposcopy is a critical triage step for identifying high-grade lesions and guiding targeted biopsies<sup>16</sup>. We selected <span class="hl hl-concept">CIN2+</span> as the <span class="hl hl-method">primary endpoint</span> because it represents a clinically actionable threshold for intervention, aligning with the intended use of our AI-assisted system<sup>17</sup>. Importantly, this system serves as an <span class="hl hl-concept">adjunctive tool</span> to improve the consistency of risk stratification and standardize biopsy site selection, particularly where operator experience is limited. <span class="hl hl-thesis">The core clinical value of AI application lies in maximizing the detection of critical precancerous lesions while minimizing both missed high-grade disease and unnecessary invasive sampling.</span></div>
+      <div class="para-cn">在宫颈癌筛查路径中，阴道镜是识别高等级病变、指导靶向活检的关键分流环节。我们选择 CIN2+ 作为主要终点，因为它代表临床上可触发干预的行动阈值，与本 AI 辅助系统的预期用途一致。需要强调的是，本系统定位为辅助工具，用于提高风险分层的一致性、使活检部位选择标准化，尤其是在操作者经验不足的场景。AI 应用的核心临床价值，在于最大化关键癌前病变的检出，同时把漏掉高等级病变与不必要的有创取材都降到最低。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>辩护终点选择。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>为"只看 CIN2+"提供正当性：终点 = 系统的预期用途，逻辑自洽；段末句把这一立场升华为全文的价值宣言。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>"临床上可行动的阈值"是有力辩护，但预先假设了"检出 CIN2+ 就该干预"——与下段承认的 CIN2 高消退率形成张力；"最小化不必要活检"与结果部分活检数下降互相呼应，形成闭环论证。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d4">
+    <div class="col-left">
+      <span class="pnum">¶ 16 · DISC-4</span>
+      <div class="para-en"><span class="hl hl-rebuttal">While CIN2+ is a reasonable primary endpoint for assessing the performance of our AI-assisted colposcopy system, we acknowledge the importance of distinguishing between CIN2 and CIN3+ in clinical practice.</span> Identifying CIN2 lesions is crucial because, while they may progress, they also have <span class="hl hl-evidence">a high rate of regression, especially in younger women (less than 30 years of age)</span>. This characteristic makes the management of CIN2 lesions more complex, as the decision to treat or monitor is influenced by various factors, including the patient's age, HPV status, and reproductive plans<sup>18–20</sup>. By contrast, <span class="hl hl-concept">CIN3+</span> lesions typically warrant immediate intervention due to their higher progression risk to invasive cancer. Thus, clinical stratification between CIN2 and CIN3+ is essential for optimizing management strategies. <span class="hl hl-thesis">This specific diagnostic challenge is exactly why CIN2+ is a relevant, real-world endpoint for evaluating an AI colposcopy-support tool.</span></div>
+      <div class="para-cn">虽然 CIN2+ 作为评估本 AI 辅助阴道镜系统的主要终点是合理的，我们也承认在临床实践中区分 CIN2 与 CIN3+ 十分重要。识别 CIN2 病变之所以关键，是因为它虽然可能进展，但也有很高的消退率（尤其在 30 岁以下年轻女性中），这使 CIN2 的管理更为复杂——治疗还是随访，取决于患者年龄、HPV 状态与生育计划等多种因素。相比之下，CIN3+ 病变因进展为浸润癌的风险更高，通常需要立即干预。因此，CIN2 与 CIN3+ 的临床分层对优化管理策略至关重要。而这一诊断难题恰恰说明，CIN2+ 是评估 AI 阴道镜辅助工具时贴近真实世界的相关终点。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>让步 + 反驳——回应"CIN2/CIN3 不分"的质疑。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>先承认区分 CIN2/CIN3+ 的临床重要性（让步），再把同一事实反转为"CIN2+ 终点更贴近现实"的论据（反驳）——把对手的论点收编为己用。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>修辞上漂亮，逻辑上有滑转："CIN2/CIN3 区分困难"既可作为"应做更细分级"的理由，也可作为"CIN2+ 足够"的理由；作者选择后者而未论证为何前者不成立。消退率有文献（18–20）支撑，是本段唯一实证。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d5">
+    <div class="col-left">
+      <span class="pnum">¶ 17 · DISC-5</span>
+      <div class="para-en"><span class="hl hl-rebuttal">Still, claims regarding clinical utility must remain grounded in the current dataset. Our findings support the use of AI for biopsy guidance, but do not yet confirm improved long-term management outcomes.</span> Future work should focus on system refinement and <span class="hl hl-method">prospective evaluation</span> of its ability to discriminate finer lesion categories under clinically relevant workflows.</div>
+      <div class="para-cn">尽管如此，关于临床效用的主张仍须以当前数据集为限。本研究结果支持将 AI 用于活检引导，但尚未证实其能改善长期管理结局。未来工作应聚焦系统改进，并在贴近临床的流程中前瞻性评估其区分更细病变类别的能力。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>限定结论边界（主动收缩）。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>在强势辩护后立即降温：明确"诊断准确 ≠ 临床结局改善"，防止读者过度解读。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>范围声明提高可信度；但与摘要中"supporting its clinical implementation"的进取表述存在温差——讨论比摘要保守，这种"外热内冷"的落差本身值得留意。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d6">
+    <div class="col-left">
+      <span class="pnum">¶ 18 · DISC-6</span>
+      <div class="para-en">A major advantage of AI colposcopy is its potential to <span class="hl hl-concept">narrow accuracy disparities</span> in healthcare and training facilities with highly limited [resources]. <span class="hl hl-thesis">The main finding of our study was that colposcopists can benefit significantly from the diagnostic results generated by the CAIADS for identical cases, leading to an improvement in diagnostic performance.</span> This effect was especially prominent among various experience-level colposcopists. As hypothesized, the diagnostic AUC of all colposcopists improved by <span class="hl hl-evidence">3%</span> with AI assistance. For relatively colposcopists with <span class="hl hl-evidence">3-5 years</span> of experience, the improvement of sensitivity was statistically significant. In previous studies<sup>7,9,21</sup>, AI-assisted clinicians' diagnoses have consistently demonstrated higher sensitivity than when they worked alone, suggesting a potential reduction in missdiagnosis. Similarly, in our study, this outcome was observed in the different experienced colposcopist groups. The results revealed that AI assistance resulted in increased sensitivity for low-experienced colposcopists that was superior to AI alone, yet still lower than that of high-experienced colposcopists. <span class="hl hl-rebuttal">However, our findings showed that high-experienced colposcopists had lower specificity and that AI-assisted diagnosis did not result in significant improvements.</span> It suggests that AI support may prompt them to apply stricter criteria when identifying &lt;CIN2 cases. This could be due to their efforts to minimize missed diagnoses may have resulted in an overlooked risk of <span class="hl hl-concept">overdiagnosis</span>. <span class="hl hl-rebuttal">We initially hypothesized that CAIADS assistance would enhance the ability of junior colposcopists to detect HSIL cases<sup>22</sup>, but we found it also assisted the experienced colposcopists in better diagnosis performance with stronger confidence.</span></div>
+      <div class="para-cn">AI 阴道镜的一大优势，在于有望缩小医疗与培训资源高度受限机构之间的准确性差距。本研究的主要发现是：面对相同病例，阴道镜医师能从 CAIADS 生成的诊断结果中显著获益，诊断表现得到改善，且这种效应在不同经验水平的医师中都很突出。正如假设所预期，AI 辅助使全体医师的诊断 AUC 提高 3%；对 3–5 年经验的医师，敏感度的改善具有统计学显著性。既往研究中，AI 辅助下临床医师的诊断敏感度一致高于独立判读，提示漏诊可能减少；本研究在不同经验组中也观察到同样结果。结果显示，AI 辅助使低年资医师的敏感度提升，超过 AI 单独运行的水平，但仍不及高年资医师。然而，高年资医师的特异度偏低，AI 辅助也未带来显著改善——这提示 AI 支持可能促使他们在判读 &lt;CIN2 病例时采用更严格的标准；为减少漏诊而付出的代价，可能是忽视了过度诊断的风险。我们最初假设 CAIADS 只会增强低年资医师检出 HSIL 的能力，但实际发现它也帮助高年资医师取得了更好、且更有信心的诊断表现。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>核心讨论段：把结果放进"公平性"框架，并解释反直觉发现。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>把数字提升为叙事（缩小经验差距），对"高年资特异度未改善"给出行为学解释，并用"假设被推翻"的坦白增强可信度。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>"缩小差距"框架切中 LMIC 筛查痛点，是本文最具社会价值的论证；但对高年资特异度的解释纯属推测，无数据支撑（如未分析 AI 输出与医师改判的对应关系）。另注意：首句在 Article in Press 版本中语法不完整（"...with highly limited."），中括号为批注者补全。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d7">
+    <div class="col-left">
+      <span class="pnum">¶ 19 · DISC-7</span>
+      <div class="para-en">One of the primary objectives of colposcopy is to guide biopsies for pathological confirmation, aiming to select an adequate number of biopsy sites to ensure diagnostic accuracy while minimizing suboptimal biopsies<sup>23</sup>. CAIADS was trained on a large dataset of annotated biopsy images to enable real-time inference of biopsy site locations<sup>22</sup>. This study is the first to evaluate colposcopists' biopsy performance with and without AI assistance, demonstrating a significant reduction in the average number of biopsies per case. The evaluation of biopsy efficacy focused on <span class="hl hl-method">the accuracy of site selection, defined as the proportion of biopsy sites aligned with standard reference directions</span>. <span class="hl hl-rebuttal">This metric primarily reflects the precision of sampling direction but does not directly address whether critical biopsy sites within the standard reference sites were missed.</span> Due to the lack of site-specific pathological outcomes in the WHO/IARC dataset, biopsy efficacy was assessed <span class="hl hl-method">at the case level</span>, using the proportion of accurate biopsy sites among all sites indicated per case. The primary metric assessed colposcopist accuracy, defined as the proportion of biopsy sites aligning with standard reference directions by WHO/IARC. In the AI-assisted scenario, the precision of biopsies performed by junior colposcopists improved significantly. The average number of biopsies per case decreased significantly, which indicated a more efficient biopsy for low-experienced colposcopists. While this approach highlights the precision of sampling direction, <span class="hl hl-rebuttal">it does not directly address the potential omission of critical biopsy sites within the standard reference areas.</span> Therefore, a prospective study design to evaluate the biopsy accuracy with site-level histologic results is necessary for assessing AI-guided colposcopy system guiding biopsy efficiency.</div>
+      <div class="para-cn">阴道镜的首要目标之一，是引导活检以获得病理确认——既要选取足够的活检点保证诊断准确，又要尽量减少次优活检。CAIADS 曾在大型标注活检图像数据集上训练，可实时推断活检点位置。本研究首次评估了阴道镜医师在有无 AI 辅助下的活检表现，显示每例平均活检点数显著减少。活检效果评估聚焦于选点准确性，即活检点与标准参考方向一致的比例——该指标主要反映取样方向的精确性，但不能直接回答标准参考区域内是否漏掉了关键活检点。由于 WHO/IARC 数据集缺少位点水平的病理结果，活检效果只能在病例层面评估（每例标注点中准确点占比）。AI 辅助下，低年资医师的活检精确度显著提高，每例活检数显著下降，提示其活检效率提升。但如前所述，这一指标无法覆盖"漏掉关键位点"的风险。因此，未来需要以位点水平病理结果为金标准的前瞻性研究，才能真正评估 AI 引导活检的效能。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>解释证据边界（方法论让步）。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>对"活检更少 = 更好"的隐含判断做限定：坦承 PPB 只是代理指标、无位点级病理金标准——给上一段的效率叙事"踩刹车"。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>同一句"不能回答是否漏掉关键位点"出现两次，透明度高；但也等于承认活检结论的证据强度有限——"效率提升"与"安全漏检"在当前数据下无法区分。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d8">
+    <div class="col-left">
+      <span class="pnum">¶ 20 · DISC-8</span>
+      <div class="para-en">Publicly available datasets offer insights into the performance, <span class="hl hl-concept">generalizability</span>, and potential applications of AI models to ensure the transparency of experiments and <span class="hl hl-concept">reproducibility</span> of results, facilitating comparative analysis across different studies and advancing innovative technological progress in the field. Due to the limitation of the public colposcopic image dataset, AI colposcopic models were developed on privately recruited colposcopic images. AI models typically require large numbers of high-quality data to achieve comparable diagnosis performance. <span class="hl hl-rebuttal">However, private datasets often face significant challenges regarding the standardization and authenticity of data collection</span>, which directly impacts the training effectiveness of AI models. Although many AI models are developed on extensive private images<sup>5,8,24</sup>, <span class="hl hl-rebuttal">the lack of external validation studies makes it difficult to determine whether these models are effective in the clinics.</span> Furthermore, several studies have demonstrated that AI systems show considerable potential in detecting between HSIL and LSIL<sup>6,25–27</sup>; however, the appropriate treatment decision is needed to determine further clarification of the lesion grades. Private datasets may lack sufficient diversity to effectively train AI models to accurately classify cervical intraepithelial neoplasia grades. Early pilot studies by Yuan et al.<sup>5</sup> demonstrated the diagnostic accuracy of the AI model for cervical lesions and validated by a collected set of images; however, further validation in large-scale prospective clinical study is still limited. In addition to improving the credibility and robustness of AI colposcopy models, <span class="hl hl-thesis">publicly available datasets are evident for enhancing the model's adaptability and reliability.</span></div>
+      <div class="para-cn">公开数据集有助于洞悉 AI 模型的性能、泛化性与潜在应用，保证实验透明与结果可复现，便于跨研究比较，推动领域内的技术创新。由于公开阴道镜图像数据集规模有限，既往 AI 阴道镜模型多在私下收集的图像上开发。AI 模型通常需要大量高质量数据才能达到可比的诊断性能，而私有数据集在数据采集的标准化与真实性上常有明显短板，直接影响模型训练效果。尽管许多模型构建于大规模私有图像之上，但外部验证研究的缺乏，使人难以判断这些模型在临床是否真的有效。此外，多项研究表明 AI 系统在区分 HSIL 与 LSIL 上潜力可观，但要落到治疗决策，仍需进一步明确病变级别。私有数据集可能多样性不足，难以有效训练模型准确分类宫颈上皮内瘤变级别。Yuan 等的早期先导研究验证了 AI 模型对宫颈病变的诊断准确性，但后续大规模前瞻性临床验证仍然有限。公开数据集不仅能提升 AI 阴道镜模型的可信度与稳健性，对增强模型的适应性与可靠性同样意义重大。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>上升为领域级论点：为"公开数据 + 外部验证"确立方法论立场。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>把单篇研究的数据选择升维为对领域的批评（私有数据 + 无外部验证 = 临床有效性未知），使本文成为领域叙事中的"示范案例"。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>有效的"以己之长攻彼之短"；但存在未被讨论的利益背景——模型由腾讯优图实验室参与开发（作者单位与致谢可见），而批评对象恰是私有数据路线；"私有数据不标准、多样性不足"等断言未引具体证据。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-d9">
+    <div class="col-left">
+      <span class="pnum">¶ 21 · DISC-9</span>
+      <div class="para-en">In conclusion, this <span class="hl hl-method">proof-of-concept diagnostic accuracy study</span> using an independent WHO/IARC dataset demonstrated that <span class="hl hl-thesis">AI assistance was associated with improved detection of high-grade cervical intraepithelial neoplasia and potential reduction of unnecessary biopsies, with the greatest benefit observed among less experienced colposcopists</span>. <span class="hl hl-rebuttal">However, these preliminary findings require rigorous validation in large-scale, multicenter prospective trials before clinical utility and generalizability can be established.</span></div>
+      <div class="para-cn">总之，这项基于独立 WHO/IARC 数据集的诊断准确性概念验证研究表明：AI 辅助与高等级宫颈上皮内瘤变检出改善、不必要活检潜在减少相关，且获益最大的是经验较少的阴道镜医师。但这些初步发现尚需在大型、多中心前瞻性试验中严格验证，才能确立其临床效用与泛化性。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>总结全文。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>标准收束：重申三件事（检出 ↑、活检 ↓、低年资获益最大），并立即用"然而"把结论边界钉住。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>"associated with"（相关而非因果）与"proof-of-concept"的措辞谨慎得当；但与摘要"supporting its clinical implementation"相比，结论段是全文最保守的表述——首尾温差再次出现。</p></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= 方法 ================= -->
+<section id="methods" class="paper-section">
+  <div class="sec-head"><h2>Methods</h2><span class="zh">方法</span></div>
+
+  <div class="sub-head">Materials and study dataset｜材料与研究数据集</div>
+
+  <div class="row" id="p-m1">
+    <div class="col-left">
+      <span class="pnum">¶ 22 · METHODS-1</span>
+      <div class="para-en">In this study, an analysis of <span class="hl hl-evidence">200 cases</span> was collected based on a publicly accessible dataset consisting of <span class="hl hl-evidence">913 colposcopy images</span> provided by WHO/IARC<sup>28</sup>. Data and metadata were accessed on August 28, 2024. Datasets were selected by their rigorous quality control process, which involved systematic image collection by collaborating colposcopists using standardized protocols, followed by collation and validation. In the AI inference process, <span class="hl hl-method">colposcopic images with Lugol's solution applied to the cervix were not included</span>, but images with acetic acid and Lugol's solution applied to the cervix were included for colposcopist interpretation. Additionally, <span class="hl hl-evidence">13 cases</span> of inadequate colposcopy due to poor focus and insufficient post-acetic acid applied images were excluded from the study. The remaining <span class="hl hl-evidence">855 colposcopy images from the 187 cases</span> were grouped into <span class="hl hl-evidence">76 cases of CIN2+ and 111 cases of &lt;CIN2</span> of the histopathology findings. The <span class="hl hl-method">International Federation for Cervical Pathology and Colposcopy (IFCPC) terminology</span> was used to determine colposcopic impressions<sup>29</sup>. The <span class="hl hl-method">CIN classification system</span> was used for histologic evaluation. Histological results were categorized as normal/benign or CIN1 were classified as &lt;CIN2, while those categorized as CIN2, CIN3, or cancer were classified as CIN2+. In cases involving lesions varying in severity across different sites, the diagnosis was determined considering <span class="hl hl-concept">the most severe lesions</span>. This study was approved by the Institutional Review Board of the Chinese Academy of Medical Sciences and Peking Union Medical College (No. CAMS&amp;PUMC-IEC-2024-028), and was conducted in accordance with the Declaration of Helsinki. The study used de-identified publicly available data from the WHO-IARC cervical image bank. Written informed consent was obtained from all colposcopists participating in the reader study before participation.</div>
+      <div class="para-cn">本研究基于 WHO/IARC 提供的公开数据集（200 例、913 张阴道镜图像）进行分析，数据与元数据于 2024 年 8 月 28 日获取。数据集经过严格质控：由合作的阴道镜医师按标准化流程系统采集图像，再整理与验证。AI 推理仅使用宫颈涂醋酸（不含 Lugol 液）的图像；医师判读则可同时使用醋酸 + Lugol 液图像。此外剔除 13 例因对焦不佳或醋酸后图像不足而不合格的病例，余下 187 例 855 张图像按组织病理分为 76 例 CIN2+ 与 111 例 &lt;CIN2。阴道镜印象采用 IFCPC 术语判定，组织学采用 CIN 分类系统：正常/良性或 CIN1 归为 &lt;CIN2，CIN2、CIN3 或癌归为 CIN2+；多点位病变严重度不一时，以最重病变定诊。本研究获中国医学科学院北京协和医学院伦理委员会批准（No. CAMS&amp;PUMC-IEC-2024-028），遵循《赫尔辛基宣言》；使用去标识化的公开数据，参与阅片研究的医师均签署知情同意书。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>方法论说明——数据来源与金标准定义。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>界定关键口径：AI 与人看的图像模态不同（AI 不用碘染图像）——这正是 Lugol-free 敏感性分析存在的原因；金标准 = 组织学最重病变。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>"AI 不看碘染、医师看"的模态不对称是必须交代的点，本文交代清楚并用敏感性分析兜底，方法学上规范；按"最重病变"归类会放大 CIN2+ 病例的阳性负荷，对敏感度指标略有利。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="sub-head">Reader study｜阅片研究</div>
+
+  <div class="row" id="p-m2">
+    <div class="col-left">
+      <span class="pnum">¶ 23 · METHODS-2</span>
+      <div class="para-en"><span class="hl hl-evidence">Fifty colposcopists</span> with different experience levels were recruited from <span class="hl hl-evidence">12 regions in China</span> to evaluate their CIN2+ diagnosis ability with and without AI diagnostic system. All readers are recruited from local obstetrics gynecology hospitals, with <span class="hl hl-evidence">3–5 years and more than 5 years</span> of colposcopic examination experience. Informed consent was obtained from all colposcopists at the time of enrollment, and they were asked to indicate their intention to participate in either the human-AI comparison study or the AI-assistance MRMC study. According to the European Federation for Colposcopy (EFC), performing <span class="hl hl-method">≥50 colposcopies annually</span> is considered the minimum requirement for a qualified colposcopist; therefore, only colposcopists meeting this criterion were eligible<sup>30</sup>.</div>
+      <div class="para-cn">研究从中国 12 个地区招募 50 名不同经验水平的阴道镜医师，评估其在有无 AI 诊断系统条件下对 CIN2+ 的诊断能力。所有阅片者来自当地妇产科医院，经验分为 3–5 年与 5 年以上两档。入组时签署知情同意书，并自选参加"人机对比研究"或"AI 辅助 MRMC 研究"。参照欧洲阴道镜联合会（EFC）标准——每年完成 ≥50 例阴道镜检查为合格阴道镜医师的最低要求，仅纳入达到该标准的医师。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>方法论说明——阅片者招募与资格标准。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>给"经验"下操作化定义（EFC ≥50 例/年 + 年限分档），使"低/高年资"分层有据可依。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>分档标准（3–5 年 vs &gt;5 年）较粗糙，年限与真实诊断能力未必线性相关；医师"自选"参加哪项研究，可能引入自选择偏倚。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-m3">
+    <div class="col-left">
+      <span class="pnum">¶ 24 · METHODS-3</span>
+      <div class="para-en">Figure 4 shown the entire study design. In human-AI comparison study, a total of <span class="hl hl-evidence">30 colposcopists</span> independently assessed all colposcopy images of cases with each primary screening result (HPV test), with no access to clinical information, colposcopy reports, and histopathological results during the assessment. All readers were required to report on colposcopy adequacy, squamocolumnar junction (SCJ) visibility, transformation zone category, colposcopic diagnosis, and biopsy selection. In AI-assistance MRMC study, a group of <span class="hl hl-evidence">15 colposcopists</span> completely participated in a two-phase reading process was conducted on the online assessment platform, with training on platform operations provided before the study for each phase. Based on common practices in diagnostic imaging research<sup>31,32</sup>, a <span class="hl hl-method">2-week washout period</span> was incorporated between the two phases of the study to minimize the potential for recall bias. In the first phase, all colposcopists reviewed images of each case and recorded the colposcopy findings, primary diagnosis, and biopsy sites <span class="hl hl-method">blinded to ground truth and without AI</span>. After two weeks of washout, each colposcopist reinterpreted all cases in <span class="hl hl-method">a randomized order</span> with the assistance of AI to prevent any systematic bias due to the case presentation order or previous readings. For each case, all participants were asked to rate their <span class="hl hl-method">confidence in diagnoses</span> in two phases with a maximum of 100 considered as "very confident". The MRMC study design was described in reader assignments in Fig. 5. <span class="hl hl-evidence">Five recruited colposcopists</span> who did not meet two trail requirements or poor quality performance were excluded. Overall, <span class="hl hl-evidence">45 colposcopists</span> participated across two trials, of which <span class="hl hl-evidence">20 low-experienced level colposcopists</span> with 3-5 years of experience and <span class="hl hl-evidence">25 high-experienced level colposcopists</span> with more than 5 years of experience. In the human-AI comparison study (n = 30), there were <span class="hl hl-evidence">9 low-experienced and 21 high-experienced</span> colposcopists. In the AI-assistance MRMC study (n = 15), there were <span class="hl hl-evidence">11 low-experienced and 4 high-experienced</span> colposcopists.</div>
+      <div class="para-cn">图 4 展示了整体研究设计。人机对比研究中，30 名医师独立判读全部病例图像（不限初筛结果），判读期间不可获取临床信息、阴道镜报告与组织病理结果；需报告阴道镜充分性、鳞柱交界可见性、转化区类型、阴道镜诊断与活检选择。AI 辅助 MRMC 研究中，15 名医师在线上平台完成两阶段阅片，每阶段前接受平台操作培训；参照诊断影像研究惯例，两阶段间设 2 周洗脱期以减少记忆效应。第一阶段医师在盲法（不知金标准）且无 AI 的条件下记录阴道镜所见、主诊断与活检点；洗脱 2 周后，以随机顺序在 AI 辅助下重读全部病例，防止呈现顺序或既往判读带来的系统偏倚。每例均要求在两阶段各评一次诊断信心（0–100 分，100 = 非常确信）。MRMC 的阅片者分配见图 5。5 名未完成两项试验要求或表现不佳者被剔除。最终共 45 名医师参与两项试验：低年资（3–5 年）20 名、高年资（&gt;5 年）25 名；人机对比研究 30 名（低 9、高 21），MRMC 研究 15 名（低 11、高 4）。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>方法论说明——两项阅片研究的执行细节。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>揭示结果的"骨架来源"：对比研究（n=30）产出表 1，MRMC（n=15）产出表 2 与 ΔAUC——两组样本不同，不能混读。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>盲法、洗脱期、随机顺序三项控制齐全，设计规范；但 MRMC 中高年资仅 4 人是先天短板，解释了该组 CI 极宽、阴性结果无力的原因；"表现不佳被剔除"的规则表述模糊，存在事后剔除的操作空间。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="sub-head">AI-guided colposcopy system｜AI 引导阴道镜系统</div>
+
+  <div class="row" id="p-m4">
+    <div class="col-left">
+      <span class="pnum">¶ 25 · METHODS-4</span>
+      <div class="para-en">The AI system evaluated in this study was developed previously and has been described in detail<sup>22</sup>. The Colposcopic Artificial Intelligence Auxiliary Diagnostic System (<span class="hl hl-concept">CAIADS</span>)<sup>22</sup> was initially developed and validated on high-resolution digital colposcopic images and non-image information and consisted of several deep-learning modules for cervix detection, lesion diagnosis grading, and biopsy sites detection. The detection deep-learning module was based on <span class="hl hl-method">CNN-ResNet-50</span> as the backbone for extracting cervix, whereas the lesion grade classification module was designed on <span class="hl hl-method">Graph Convolutional Network (GCN)</span>-based architecture for fusing features. The annotated lesion location of colposcopic images was trained for a segmentation module based on <span class="hl hl-method">U-Net and YOLOv3</span> to address the biopsy guidance. The AI system was trained by <span class="hl hl-evidence">13,000 multicenter patients with approximately 60,000 digital colposcopic images</span> and non-image information. It achieved <span class="hl hl-evidence">82.2% accuracy</span> for lesion grading with histological results as the gold standard on a test set of <span class="hl hl-evidence">3000 patients</span>, and its standalone diagnosis sensitivity was higher than colposcopist. It also presented the accurate biopsy site prediction with a <span class="hl hl-evidence">75.8% distribution of intersection</span> on ground truth biopsy sites.</div>
+      <div class="para-cn">本研究评估的 AI 系统由课题组前期开发（已另文详述）。阴道镜人工智能辅助诊断系统（CAIADS）基于高分辨率数字阴道镜图像与非图像信息开发和验证，由宫颈检测、病变诊断分级、活检点检测等多个深度学习模块构成：宫颈检测模块以 CNN-ResNet-50 为骨干；病变分级模块采用图卷积网络（GCN）架构融合特征；分割模块基于 U-Net 与 YOLOv3 训练标注的病变位置，用于活检引导。系统训练数据为 13,000 例多中心患者、约 60,000 张数字阴道镜图像及非图像信息；在 3,000 例患者测试集上，以组织学为金标准的病变分级准确率达 82.2%，独立诊断敏感度高于阴道镜医师，活检点预测与金标准活检点的交集分布为 75.8%。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>方法论说明——被测系统的来源与能力档案。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>说明"被测对象"并非新模型，而是已有内部验证数据的 CAIADS——外部验证的对象明确，且无调参，保证验证的独立性。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>82.2% 的内部准确率与本外部数据上的表现可对照，但内部测试集与 WHO 数据的分布差异未量化；系统由腾讯团队参与开发（利益相关，见文末致谢）。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-m5">
+    <div class="col-left">
+      <span class="pnum">¶ 26 · METHODS-5</span>
+      <div class="para-en">For the current independent external validation, CAIADS was executed using a <span class="hl hl-method">strictly fixed inference configuration</span> and the same prespecified decision rules established in the original development study. The system processes all eligible colposcopic images available for a given case (typically ~5 images per case) to generate a single <span class="hl hl-method">case-level binary diagnosis (CIN2+ vs. &lt;CIN2)</span> alongside biopsy guidance. Crucially, <span class="hl hl-method">no model tuning, threshold adjustment, or recalibration was performed on the WHO/IARC dataset; all inference parameters were locked a priori</span>. During the AI-assisted reading phase, the evaluation platform displayed the CAIADS case-level diagnostic output and biopsy guidance (comprising lesion visualizations and suggested biopsy areas with red bounding box).</div>
+      <div class="para-cn">在本次独立外部验证中，CAIADS 以严格固定的推理配置运行，沿用原开发研究中预设的决策规则：对每例的全部合格图像（通常约 5 张）进行处理，生成病例级的二分类诊断（CIN2+ vs &lt;CIN2）及活检引导。关键的是，研究未在 WHO/IARC 数据集上做任何模型调优、阈值调整或重新校准——所有推理参数均事先锁定。AI 辅助阅片阶段，评估平台向医师展示 CAIADS 的病例级诊断输出与活检引导（含病变可视化与红框标注的建议活检区域）。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>方法论说明——验证的"公平性条款"。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>"参数先验锁定"是外部验证可信度的核心保障，直接回应引言提出的"内部验证高估性能"问题。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>这是方法部分最有力的合规声明（no tuning / locked a priori）；但"锁定"由开发者自证，若由第三方独立复核会更强。AI 只输出病例级二分类，与医师可输出多级判读的任务不完全对称。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="sub-head">Statistical analysis｜统计分析</div>
+
+  <div class="row" id="p-m6">
+    <div class="col-left">
+      <span class="pnum">¶ 27 · METHODS-6</span>
+      <div class="para-en">Two reader studies were conducted and analyzed separately; the diagnosis performance was assessed for both. The sample size of interpretation cases and number of readers were determined based on variability of readers and patient diversity<sup>33</sup>. Performance evaluation was conducted using <span class="hl hl-method">histopathological results as the gold standard</span>. The <span class="hl hl-method">primary endpoint was histologic HSIL (CIN2+ vs. &lt;CIN2)</span>. For each reader and the AI system, we calculated sensitivity, specificity, accuracy, positive predictive value (PPV), and negative predictive value (NPV) based on the CIN2+ classification. 95% confidence intervals (CIs) for these binary metrics were obtained using <span class="hl hl-method">nonparametric bootstrap resampling at the case level</span><sup>34</sup>.</div>
+      <div class="para-cn">两项阅片研究分别进行与分析，各自评估诊断性能。判读病例数与阅片者数量依据阅片者变异和患者多样性确定。评估以组织病理结果为金标准，主要终点为组织学 HSIL（CIN2+ vs &lt;CIN2）。对每名阅片者与 AI 系统，基于 CIN2+ 分类计算敏感度、特异度、准确度、阳性预测值（PPV）与阴性预测值（NPV）；这些二分类指标的 95% CI 用病例水平非参数 bootstrap 重抽样获得。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>方法论说明——金标准与指标定义。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>统一口径：一切以组织学最重病变为金标准，二分类阈值 CIN2+。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>样本量"依据变异性和多样性确定"未给正式计算式，属弱声明；bootstrap CI 在 187 例下对尾部估计偏宽——这与 AI 系统 CI 异常宽（74.4–90.7）直接相关。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-m7">
+    <div class="col-left">
+      <span class="pnum">¶ 28 · METHODS-7</span>
+      <div class="para-en">In the AI-assistance MRMC study, the <span class="hl hl-method">prespecified primary comparison was the difference in area under the receiver operating characteristic curve (ΔAUC)</span> for CIN2+ detection between AI-assisted and unassisted reads across all colposcopists. To properly account for the correlated nature of the data across readers and cases, AUCs, ΔAUC, and their corresponding 95% CIs and p-values were estimated using the <span class="hl hl-method">iMRMC R package</span>. For secondary binary metrics, including sensitivity, specificity, PPV and NPV, differences were evaluated descriptively, with 95% CIs derived from case-level nonparametric bootstrapping to appropriately capture variance. Inter-reader agreement for lesion grading was assessed using <span class="hl hl-method">Fleiss κ</span>. The sensitivity analysis restricted to the <span class="hl hl-method">Lugol-free cases subset</span> was additionally performed, aligning with the AI system's exclusive reliance on this modality for inference.</div>
+      <div class="para-cn">在 AI 辅助 MRMC 研究中，预先设定的主要比较是全体阴道镜医师在辅助与无辅助阅片间检出 CIN2+ 的 AUC 差值（ΔAUC）。为恰当处理阅片者与病例间的数据相关性，AUC、ΔAUC 及其 95% CI 与 p 值用 iMRMC R 包估计。次要二分类指标（敏感度、特异度、PPV、NPV）的差异采用描述性评估，95% CI 由病例水平非参数 bootstrap 获得。病变分级的阅片者间一致性用 Fleiss κ 评估。此外，针对 AI 推理仅依赖醋酸模态这一特点，补充了不含 Lugol 病例子集的敏感性分析。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>方法论说明——主终点与检验框架。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>明确"唯一做假设检验的是 ΔAUC"，其余为描述——这解释了正文中"显著/不显著"结论为何集中在 AUC 上。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>主终点预设（prespecified）规范；但这也意味着总体 ΔAUC 不显著是"主检验失败"，亚组 p = 0.043 应视为探索性结果——正文语气上未完全区分两者。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-m8">
+    <div class="col-left">
+      <span class="pnum">¶ 29 · METHODS-8</span>
+      <div class="para-en">For each case, readers additionally provided a diagnostic confidence score on a 1–100 scale (100 = very confident). Changes in confidence scores between unassisted and assisted phases were evaluated by <span class="hl hl-method">paired t-test</span>. Biopsy concordance was quantified by the proportion of biopsies matching the reference biopsy clock-position(s) provided in the WHO/IARC dataset metadata. Given the absence of site-specific histopathological outcomes in the dataset, biopsy performance was assessed at the case level using the proportion of precise biopsy sites (<span class="hl hl-concept">PPB</span>). For each case, PPB was defined as: PPB = (number of reader-indicated biopsy clock-position(s) concordant with the reference clock-position(s) provided in the dataset metadata) / (total number of biopsy sites indicated by the reader for that case). PPB values were then summarized across cases for comparisons between reading phases. Paired comparisons of biopsy concordance between reading phases were assessed using the <span class="hl hl-method">Wilcoxon signed-rank test</span>. Analyses were performed in R (v4.4.2) and Python (pandas, scikit-learn). A two-sided p value &lt; 0.05 was considered statistically significant.</div>
+      <div class="para-cn">每例还要求医师给出 1–100 分的诊断信心评分（100 = 非常确信），两阶段信心变化的比较用配对 t 检验。活检一致性以活检点与 WHO/IARC 元数据中参考时钟方位的吻合比例量化；因数据集缺少位点级病理结果，活检表现只能在病例层面用精确活检点比例（PPB）衡量：PPB =（与参考方位一致的活检点数）/（该例医师标注的活检点总数），并在病例间汇总比较两阶段差异，配对比较用 Wilcoxon 符号秩检验。分析用 R（v4.4.2）与 Python（pandas、scikit-learn）完成，双侧 p &lt; 0.05 视为有统计学意义。</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>方法论说明——信心与活检指标的度量。</p></div>
+        <div class="anno-item"><span class="chip chip-role">逻辑角色</span><p>给出 PPB 的精确公式，使"活检更准"的结论可复核；同时从公式本身即可看出其局限。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>PPB 的分母是"医师标出的点数"——若 AI 辅助让医师少标 1 个点且恰好都准，PPB 会因分母变小而虚高。"活检数下降 + PPB 上升"可能同源，属于指标构造带来的人为关联，读者需警惕。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="row" id="p-m9">
+    <div class="col-left">
+      <span class="pnum">¶ 30 · DATA AVAILABILITY</span>
+      <div class="para-en">The data used in this study are de-identified and publicly available from the International Agency for Research on Cancer cervical image bank at the following website: <span class="hl hl-method">https://screening.iarc.fr/cervicalimagebank.php</span></div>
+      <div class="para-cn">本研究数据已去标识化并公开可得，来自国际癌症研究机构（IARC）宫颈图像库：https://screening.iarc.fr/cervicalimagebank.php</div>
+    </div>
+    <aside class="col-right">
+      <div class="anno-card">
+        <div class="anno-item"><span class="chip chip-func">段落功能</span><p>数据可得性声明（例行条款）。</p></div>
+        <div class="anno-item"><span class="chip chip-tip">技巧 · 漏洞</span><p>数据公开 + 参数锁定 + 公开代码工具（iMRMC），共同构成本研究"可复现性"承诺的完整链条。</p></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= 论证结构总览 ================= -->
+<section id="overview" class="paper-section">
+  <div class="sec-head"><h2>Argument Map</h2><span class="zh">论证结构总览</span></div>
+
+  <div class="flow">
+    <div class="flow-node"><b>① 问题</b>阴道镜高度依赖主观判读与操作者经验，可重复性低；已有 AI 系统仅经内部验证，性能可能被高估、泛化性未知。</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><b>② 论点</b>在独立 WHO 开源数据集上，以 FDA 推荐的 MRMC 设计外部验证 CAIADS，可检验其泛化性并量化 AI 辅助的真实增量。</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><b>③ 证据</b>AI 敏感度 84.2%（≈5 年经验医师）；辅助后整体敏感度 84.8%→90.6%；低年资 AUC +3.9%（p=0.043）；活检 2.48→2.02/例；信心 69.4→77.8。</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node rebuttal"><b>④ 让步 / 反驳</b>总体 ΔAUC +3.7% 不显著；AI 特异度仅 55.9%、43.4% 误判；PPB 缺位点级病理金标准；MRMC 存在顺序与确认偏倚。</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><b>⑤ 结论</b>AI 辅助的最大受益者是低年资医师——AI 可弥合诊断经验差距；临床落地前需大型前瞻性多中心试验验证。</div>
+  </div>
+
+  <div class="overview-grid">
+    <div class="ov-card ov-claim">
+      <h4>作者核心主张（一句话）</h4>
+      "这些发现凸显了 AI 系统在独立外部数据集上的稳健表现及其弥合阅片者诊断经验差距的能力，支持其作为阴道镜评估的宝贵辅助工具投入临床应用。"（= 摘要末句）
+    </div>
+    <div class="ov-card ov-strong">
+      <h4>论证最强处</h4>
+      方法学闭环：独立公开数据集 + 推理参数先验锁定 + FDA 推荐的 MRMC/iMRMC 框架 + Lugol-free 敏感性分析——让"外部验证"名实相符，透明且可复现，直接量化了 AI 的增量价值。
+    </div>
+    <div class="ov-card ov-weak">
+      <h4>论证最弱处</h4>
+      获益证据的单薄：唯一预设主终点（总体 ΔAUC）未达显著，"显著"仅存在于 11 人的低年资亚组（高年资组仅 4 人）；活检获益依赖无位点级病理金标准的代理指标 PPB，且分母效应可能夸大改善。
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  本页面由 paper-annotate skill 生成 · 双栏批注为个人研读笔记，"技巧 · 漏洞"等批注内容是读者的批判性分析，不代表论文作者观点；中文译文为意译，仅供学习参考，请以英文原文为准。原文为 Article in Press 版本（2026-06-25 接收），引用请以最终出版版本为准。
+</footer>
+
+<script>
+const sections=[...document.querySelectorAll('main section[id]')];
+const links=[...document.querySelectorAll('#sectionNav a')];
+const map=new Map(links.map(l=>[l.getAttribute('href').slice(1),l]));
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(l=>l.classList.remove('active'));
+      const l=map.get(e.target.id);
+      if(l)l.classList.add('active');
+    }
+  });
+},{rootMargin:'-15% 0px -75% 0px'});
+sections.forEach(s=>io.observe(s));
+</script>
+
+</body>
+</html>
